@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ImageView.ScaleType;
 
 public class MainActivity extends Activity {
 	private static final String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more";
@@ -44,7 +45,7 @@ public class MainActivity extends Activity {
 	 * 
 	 * Potential max is 12 for now I think.
 	 */
-	int amountToLoad = 4; 
+	int amountToLoad = 6; 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -273,8 +274,6 @@ public class MainActivity extends Activity {
 			if (result != null) {
 				for (int i = 0; i < flagImageViews.length; i++) {
 					flagImageViews[i].setImageBitmap(result[i]);
-					flagImageViews[i].setScaleX(FLAG_SCALE);
-					flagImageViews[i].setScaleY(FLAG_SCALE);
 				}
 			}
 		}
@@ -291,5 +290,4 @@ public class MainActivity extends Activity {
 		
 		return Bitmap.createScaledBitmap(inputBitmap, deviceWidth, (int)(deviceWidth / ratio), false);
 	}
-
 }
