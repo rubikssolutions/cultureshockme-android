@@ -34,6 +34,8 @@ public class MainActivity extends Activity {
 	ImageView[] backgroundImageViews;
 
 	int counter = 0;
+	
+	int deviceWidth = 240;
 
 	/*
 	 * pulls the first x stories and displays them.
@@ -42,12 +44,16 @@ public class MainActivity extends Activity {
 	 * 
 	 * Potential max is 12 for now I think.
 	 */
-	int amountToLoad = 3; 
+	int amountToLoad = 4; 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+		deviceWidth = dm.widthPixels;
 		
 		addViews();
 		
@@ -150,10 +156,12 @@ public class MainActivity extends Activity {
 			
 			for (int i = 0; i < backgroundArray.length; i++) {
 				try {
-					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(backgroundURLArray[i]).getContent());
+					BitmapFactory.Options options = new BitmapFactory.Options();
+					options.inSampleSize = 4;
+					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(backgroundURLArray[i]).getContent(), null, options);
 					backgroundArray[i] = bitmap; 
 				} catch (Exception e) {
-					Log.e(TAG, "error fetching BACKGROUND from URL", e);
+					Log.e(TAG, "error fetching BACKGROUND from URL -" + i, e);
 				}
 			}
 			return backgroundArray;
@@ -283,4 +291,5 @@ public class MainActivity extends Activity {
 		
 		return Bitmap.createScaledBitmap(inputBitmap, deviceWidth, (int)(deviceWidth / ratio), false);
 	}
+
 }
