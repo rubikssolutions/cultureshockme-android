@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
 	 * 
 	 * Potential max is 12 for now I think.
 	 */
-	int amountToLoad = 4; 
+	int amountToLoad = 3; 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
