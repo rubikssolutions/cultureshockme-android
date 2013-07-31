@@ -14,9 +14,9 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
 	TextView[] authorTextViews;
 	ImageView[] flagImageViews;
 	ImageView[] backgroundImageViews;
+	ImageView[] profileImageViews;
 
 	int counter = 0;
 	
@@ -57,6 +58,7 @@ public class MainActivity extends Activity {
 		
 		addViews();
 		
+		new ProfilePictureLoader().execute();
 		new StoryLoader().execute();
 		new AuthorLoader().execute();
 		new FlagLoader().execute();
@@ -65,14 +67,17 @@ public class MainActivity extends Activity {
 		new BackgroundLoader().execute();
 	}
 	
-	private void addViews () {
-		View myLayout = findViewById(R.id.scrollingLinearView);
+	private void addViews () {		
+		View myLayout = findViewById(R.id.mainBottomView);
+//		View leftTopLayout = findViewById(R.id.topLeftView);
+//		View rightTopLayout = findViewById(R.id.topRightView);
 		
 		// Create the arrays
 		textViews = new TextView[amountToLoad];
 		authorTextViews = new TextView[amountToLoad];
 		flagImageViews = new ImageView[amountToLoad];
 		backgroundImageViews = new ImageView[amountToLoad];
+		profileImageViews = new ImageView[amountToLoad];
 
 		// Set up the LayoutParams
 		LinearLayout.LayoutParams backgroundParams = new LinearLayout.LayoutParams(
@@ -85,6 +90,9 @@ public class MainActivity extends Activity {
 		LinearLayout.LayoutParams layoutParamsNoPadding = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);
+		LinearLayout.LayoutParams layoutParamsProfile = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
 		
 		// Add all the views
 		for (int i = 0; i < amountToLoad; i++) {
@@ -93,12 +101,14 @@ public class MainActivity extends Activity {
 			TextView author = new TextView(this);
 			ImageView flag = new ImageView(this);
 			ImageView background = new ImageView(this);
+			ImageView profile = new ImageView(this);
 			
 			// Add them to the arrays
 			textViews[i] = text;
 			authorTextViews[i] = author;
 			flagImageViews[i] = flag;
 			backgroundImageViews[i] = background; 
+			profileImageViews[i] = profile; 
 			
 			// Set the loading text
 			text.setText("Loading stories...");
@@ -106,6 +116,7 @@ public class MainActivity extends Activity {
 			author.setText("Loading authors...");
 			
 			// Set the layout parameters
+			profile.setLayoutParams(layoutParamsProfile);
 			author.setLayoutParams(layoutParamsNoPadding);
 			flag.setLayoutParams(layoutParamsNoPadding);
 			flag.setPadding(0, 0, 0, 5);
@@ -117,8 +128,19 @@ public class MainActivity extends Activity {
 			author.setBackgroundColor(Color.WHITE);
 			background.setBackgroundColor(Color.WHITE);
 			text.setBackgroundColor(Color.WHITE);
-
+			
+//			if (i % 2 == 0) {
+//				((LinearLayout) leftTopLayout).addView(profile);
+//				((LinearLayout) rightTopLayout).addView(flag);
+//				((LinearLayout) rightTopLayout).addView(author);
+//			} else {
+//				((LinearLayout) myLayout).addView(profile);
+//				((LinearLayout) myLayout).addView(flag);
+//				((LinearLayout) myLayout).addView(author);
+//			}
+			
 			// The order in which to display the items
+			((LinearLayout) myLayout).addView(profile);
 			((LinearLayout) myLayout).addView(flag);
 			((LinearLayout) myLayout).addView(author);
 			((LinearLayout) myLayout).addView(background);
@@ -174,6 +196,48 @@ public class MainActivity extends Activity {
 				try {
 					backgroundArray[i] = scaleBitmapToDevice(backgroundArray[i]);
 					backgroundImageViews[i].setImageBitmap(backgroundArray[i]);
+					backgroundImageViews[i].setPadding(8, 0, 8, 0);
+				} catch (Exception e) {
+					Log.e(TAG, "Can't scale Bitmap, probable cause: picture missing from the story!", e);
+				}
+			}
+		}
+	}
+	
+	class ProfilePictureLoader extends AsyncTask<String, Void, Bitmap[]> {
+		@Override
+		protected Bitmap[] doInBackground(String... params) {	
+			Bitmap[] profiles = new Bitmap[amountToLoad];
+			String[] profileURLs = new String[amountToLoad];
+			try {
+				Document doc = Jsoup.connect(API_URL).get();
+				for (int i = 0; i < profiles.length; i++) {
+					Element pic = doc.select("img").get(i);
+					String url = pic.absUrl("src");
+					System.out.println(url);
+					profileURLs[i] = url; 
+				}
+			} catch (Exception e) {
+				Log.e(TAG, "error connecting to server", e);
+			}
+			
+			for (int i = 0; i < profiles.length; i++) {
+				try {
+					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(profileURLs[i]).getContent());
+					profiles[i] = bitmap; 
+				} catch (Exception e) {
+					Log.e(TAG, "error fetching BACKGROUND from URL -" + i, e);
+				}
+			}
+			return profiles;
+		}
+		
+		@Override
+		protected void onPostExecute(Bitmap[] profiles) {
+			for (int i = 0; i < backgroundImageViews.length; i++) {
+				try {
+					profileImageViews[i].setImageBitmap(profiles[i]);
+					profileImageViews[i].setPadding(8, 0, 8, 0);
 				} catch (Exception e) {
 					Log.e(TAG, "Can't scale Bitmap, probable cause: picture missing from the story!", e);
 				}
@@ -209,6 +273,7 @@ public class MainActivity extends Activity {
 				for (int i = 0; i < textViews.length; i++) {
 					textViews[i].setText(result[i]);
 					textViews[i].setTextSize(17f);
+					textViews[i].setPadding(10, 0, 10, 0);
 				}
 			}
 		}
@@ -223,7 +288,7 @@ public class MainActivity extends Activity {
 				for (int i = 0; i < authorArray.length; i++) {							
 					Element authorElement = doc.select("[class=user_link]").get(i);
 					Element countryElement = doc.select("[class=browse_story_location with_countryflag_icon]").get(i);
-					authorArray[i] = authorElement.text() + " - " +  countryElement.text();
+					authorArray[i] = "<big>" +"<i>" + authorElement.text() +"</i>" + "</big>\n" + "<br />" + countryElement.text();
 				}
 				return authorArray;
 			} catch (Exception e) {
@@ -235,9 +300,9 @@ public class MainActivity extends Activity {
 		protected void onPostExecute(String[] result) {
 			if (result != null) {
 				for (int i = 0; i < authorTextViews.length; i++) {
-					authorTextViews[i].setText(result[i]);
-					authorTextViews[i].setTypeface(null, Typeface.ITALIC);
+					authorTextViews[i].setText(Html.fromHtml(result[i]));
 					authorTextViews[i].setTextSize(15f);
+					authorTextViews[i].setPadding(10, 0, 10, 0);
 				}
 			}
 		}
@@ -273,7 +338,7 @@ public class MainActivity extends Activity {
 		protected void onPostExecute(Bitmap[] result) {
 			if (result != null) {
 				for (int i = 0; i < flagImageViews.length; i++) {
-					flagImageViews[i].setImageBitmap(result[i]);
+					flagImageViews[i].setImageBitmap(result[i]); 
 				}
 			}
 		}

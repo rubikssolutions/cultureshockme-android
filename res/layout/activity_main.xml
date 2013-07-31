@@ -14,7 +14,6 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/top_layout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@id/bottom_layout"
@@ -27,10 +26,10 @@
             android:background="@drawable/activity_main_header" >
 
             <ImageView
-                android:id="@+id/app_icon"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_marginRight="220dp"
+                android:layout_marginLeft="14dp"
+                android:layout_marginStart="14dp"
                 android:background="@drawable/ic_launcher"
                 android:contentDescription="@string/action_settings" />
         </LinearLayout>
@@ -42,12 +41,19 @@
             android:scrollY="20dp" >
 
             <LinearLayout
-                android:id="@+id/scrollingLinearView"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
                 android:orientation="vertical" >
+                <LinearLayout
+                    android:id="@+id/mainBottomView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginStart="8dp"
+                    android:orientation="vertical" >
+                </LinearLayout>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
