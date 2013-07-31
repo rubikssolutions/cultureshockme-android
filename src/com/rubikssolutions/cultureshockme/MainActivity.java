@@ -8,6 +8,7 @@ import java.net.URLConnection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -22,12 +23,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.ImageView.ScaleType;
 
 public class MainActivity extends Activity {
 	private static final String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more";
 	private static final String TAG = "MainActivity";
-	private static final Float FLAG_SCALE = 1.5f;
 
 	TextView[] textViews;
 	TextView[] authorTextViews;
@@ -45,7 +44,7 @@ public class MainActivity extends Activity {
 	 * 
 	 * Potential max is 12 for now I think.
 	 */
-	int amountToLoad = 6; 
+	int amountToLoad = 4; 
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +83,7 @@ public class MainActivity extends Activity {
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		layoutParamsBottomPadding.setMargins(0, 0, 0, 15);
 		LinearLayout.LayoutParams layoutParamsNoPadding = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		
 		// Add all the views
@@ -135,16 +134,17 @@ public class MainActivity extends Activity {
 			
 			try {
 				Document doc = Jsoup.connect(API_URL).get();
+				Elements uRLElements = doc.select("[style^=background-image:url(']");
 				int backgroundCounter = 0;
 				for (int i = 0; i < (amountToLoad * 2); i++) {
 					try {
-						String uRLString = doc.select("[style^=background-image:url(']").get(i) + " a";
-						uRLString = uRLString.substring(73);
-						if (uRLString.startsWith("http")) {
-							uRLString = uRLString.substring(0, uRLString.length() - 12);
-							backgroundURLArray[backgroundCounter] = uRLString;
+						String uRlString = uRLElements.get(i).toString();
+						uRlString = uRlString.substring(73);
+						if (uRlString.startsWith("http")) {
+							uRlString = uRlString.substring(0, uRlString.length() - 10);
+							backgroundURLArray[backgroundCounter] = uRlString;
 							backgroundCounter++;
-						} else if (uRLString.startsWith("'")) {
+						} else if (uRlString.startsWith("'")) {
 							backgroundCounter++;
 						}
 					} catch (Exception e) {
@@ -155,10 +155,10 @@ public class MainActivity extends Activity {
 				Log.e(TAG, "error connecting to server", e);
 			}
 			
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inSampleSize = 2;
 			for (int i = 0; i < backgroundArray.length; i++) {
 				try {
-					BitmapFactory.Options options = new BitmapFactory.Options();
-					options.inSampleSize = 4;
 					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(backgroundURLArray[i]).getContent(), null, options);
 					backgroundArray[i] = bitmap; 
 				} catch (Exception e) {
