@@ -10,6 +10,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import android.R.integer;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,6 +21,8 @@ import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -45,7 +48,13 @@ public class MainActivity extends Activity {
 	 * 
 	 * Potential max is 12 for now I think.
 	 */
-	int amountToLoad = 4; 
+	int amountToLoad = 3; 
+	
+	int amountToHold = 12;
+	String[] allStories;
+	String[] allAuthors;
+	
+	int currentPage = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,16 +70,12 @@ public class MainActivity extends Activity {
 		new ProfilePictureLoader().execute();
 		new StoryLoader().execute();
 		new AuthorLoader().execute();
-		new FlagLoader().execute();
-		
-		// Note - takes a while and is probably horribly inefficient. 
-		new BackgroundLoader().execute();
+		new FlagLoader().execute(); 
+		new BackgroundLoader().execute();		
 	}
 	
 	private void addViews () {		
 		View myLayout = findViewById(R.id.mainBottomView);
-//		View leftTopLayout = findViewById(R.id.topLeftView);
-//		View rightTopLayout = findViewById(R.id.topRightView);
 		
 		// Create the arrays
 		textViews = new TextView[amountToLoad];
@@ -78,6 +83,10 @@ public class MainActivity extends Activity {
 		flagImageViews = new ImageView[amountToLoad];
 		backgroundImageViews = new ImageView[amountToLoad];
 		profileImageViews = new ImageView[amountToLoad];
+		
+		// Create the arrays to hold ALL
+		allStories = new String[amountToHold];
+		allAuthors = new String[amountToHold];
 
 		// Set up the LayoutParams
 		LinearLayout.LayoutParams backgroundParams = new LinearLayout.LayoutParams(
@@ -110,11 +119,6 @@ public class MainActivity extends Activity {
 			backgroundImageViews[i] = background; 
 			profileImageViews[i] = profile; 
 			
-			// Set the loading text
-			text.setText("Loading stories...");
-			text.setTextSize(20f);
-			author.setText("Loading authors...");
-			
 			// Set the layout parameters
 			profile.setLayoutParams(layoutParamsProfile);
 			author.setLayoutParams(layoutParamsNoPadding);
@@ -129,16 +133,6 @@ public class MainActivity extends Activity {
 			background.setBackgroundColor(Color.WHITE);
 			text.setBackgroundColor(Color.WHITE);
 			
-//			if (i % 2 == 0) {
-//				((LinearLayout) leftTopLayout).addView(profile);
-//				((LinearLayout) rightTopLayout).addView(flag);
-//				((LinearLayout) rightTopLayout).addView(author);
-//			} else {
-//				((LinearLayout) myLayout).addView(profile);
-//				((LinearLayout) myLayout).addView(flag);
-//				((LinearLayout) myLayout).addView(author);
-//			}
-			
 			// The order in which to display the items
 			((LinearLayout) myLayout).addView(profile);
 			((LinearLayout) myLayout).addView(flag);
@@ -146,6 +140,70 @@ public class MainActivity extends Activity {
 			((LinearLayout) myLayout).addView(background);
 			((LinearLayout) myLayout).addView(text);
 		}
+		
+		Button testButton = (Button) findViewById(R.id.buttonLoadMoreStories);
+		testButton.setText("Testinupp!");
+		testButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				addPage(false, false, true, false, true);
+			}
+		});
+//		((LinearLayout) myLayout).addView(testButton);
+	}
+	
+	private TextView[] addPage(boolean profile, boolean flag, boolean author,
+			boolean background, boolean text) {
+		int storiesPerPage = 4;
+		View myLayout = findViewById(R.id.mainBottomView);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.MATCH_PARENT);
+		params.setMargins(10, 0, 10, 10);
+		TextView[] views = new TextView[storiesPerPage];
+
+		for (int i = 0; i < views.length; i++) {
+			if (profile) {}
+			if (flag) {}
+			
+			if (author) {
+				TextView view = new TextView(this);
+				view.setLayoutParams(params);
+				view.setText(getAuthorForView(currentPage, i));
+				view.setTextSize(17);
+				views[i] = view;
+				((LinearLayout) myLayout).addView(view);
+			}
+			if (background) {}
+			
+			if (text) {
+				TextView view = new TextView(this);
+				view.setLayoutParams(params);
+				view.setText(getTextForView(currentPage, i));
+				view.setTextSize(17);
+				views[i] = view;
+				((LinearLayout) myLayout).addView(view);
+			}
+		}
+		currentPage++;
+		return views;
+	}
+
+	private String getTextForView(int currentPage, int itemnumber) {
+		if (currentPage * (itemnumber + 1) >= 12) {
+			currentPage = 1;
+			itemnumber = 0;
+		}
+		return allStories[currentPage * (itemnumber + 1)];
+	}
+	
+	private String getAuthorForView(int currentPage, int itemnumber) {
+		if (currentPage * (itemnumber + 1) >= 12) {
+			currentPage = 1;
+			itemnumber = 0;
+		}
+		return allAuthors[currentPage * (itemnumber + 1)];
 	}
 
 	class BackgroundLoader extends AsyncTask<String, Void, Bitmap[]> {
@@ -260,6 +318,13 @@ public class MainActivity extends Activity {
 					Element textElement = doc.select("H3").get(i);
 					textArray[i] = textElement.text();
 				}
+				
+				// A separate array since sometimes we want to load
+				// less than 12 in the "main" part.
+				for (int i = 0; i < 12; i++) {
+					Element textElement = doc.select("H3").get(i);
+					allStories[i] = textElement.text(); 
+				}
 
 				return textArray;
 			} catch (Exception e) {
@@ -280,6 +345,10 @@ public class MainActivity extends Activity {
 	}
 
 	class AuthorLoader extends AsyncTask<String, Void, String[]> {
+		protected void onPreExecute() {
+			authorTextViews[0].setText("Loading authors...");
+		}
+		
 		protected String[] doInBackground(String... urls) {
 			try {
 				Document doc = Jsoup.connect(API_URL).get();
@@ -290,6 +359,13 @@ public class MainActivity extends Activity {
 					Element countryElement = doc.select("[class=browse_story_location with_countryflag_icon]").get(i);
 					authorArray[i] = "<big>" +"<i>" + authorElement.text() +"</i>" + "</big>\n" + "<br />" + countryElement.text();
 				}
+				// A separate array since sometimes we want to load
+				// less than 12 in the "main" part.
+				for (int i = 0; i < 12; i++) {
+					Element authorElement = doc.select("[class=user_link]").get(i);
+					allAuthors[i] = authorElement.text(); 
+				}
+				
 				return authorArray;
 			} catch (Exception e) {
 				Log.e(TAG, "error fetching AUTHOR from server", e);
@@ -355,4 +431,29 @@ public class MainActivity extends Activity {
 		
 		return Bitmap.createScaledBitmap(inputBitmap, deviceWidth, (int)(deviceWidth / ratio), false);
 	}
+	
+//	public class EndlessScrollListener implements OnScrollListener {
+//
+//		private int visibleThreshold = 3;
+//		private int currentPage = 0;
+//
+//		@Override
+//		public void onScroll(AbsListView view, int firstVisibleItem,
+//				int visibleItemCount, int totalItemCount) {
+//		}
+//
+//		@Override
+//		public void onScrollStateChanged(AbsListView view, int scrollState) {
+//			if (scrollState == SCROLL_STATE_IDLE) {
+//				if (listView.getLastVisiblePosition() >= listView.getCount()
+//						- visibleThreshold) {
+//					currentPage++;
+//					StoryLoaderWithPages.execute();
+//					StoryLoaderWithPages.setPage(currentPage);
+//				}
+//			}
+//		}
+//
+//	}
+
 }
