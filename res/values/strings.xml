@@ -3,5 +3,10 @@
 
     <string name="app_name">CultureShockMe</string>
     <string name="action_settings">Settings</string>
+    
+    <!-- Info screen -->
+    <string name="info_email">contact@rubikssolutions.com</string>
+    <string name="info_company_name">Rubik’s Solutions</string>
+    <string name="info_logo">Rubik’s Solutions logo</string>
 
 </resources>

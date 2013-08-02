@@ -24,19 +24,6 @@
                      />
             </shape>
         </item>
-        <item>  
-            <shape>
-                <gradient 
-                    android:startColor="#F1F5F9"
-                    android:endColor="#00FFFFFF"
-                    android:type="radial"
-                    android:gradientRadius="43"
-                    android:centerColor="#FFFFFF"
-                    android:centerX="0.875"
-                    android:centerY="0.5"
-                     />
-            </shape>
-        </item>
     </layer-list>
 </item>
 </selector>

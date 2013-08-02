@@ -7,10 +7,11 @@ import java.net.URLConnection;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import android.R.anim;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -22,9 +23,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.support.v4.view.ViewPager;
 
 public class MainActivity extends Activity {
 	private static final String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more";
@@ -68,6 +71,15 @@ public class MainActivity extends Activity {
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
 		deviceWidth = dm.widthPixels;
+		
+		ImageButton infoButton = (ImageButton) findViewById(R.id.button_info);
+		infoButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent infoScreenIntent = new Intent(MainActivity.this, InfoScreen.class);
+				MainActivity.this.startActivity(infoScreenIntent);
+			}
+		}); 	 
 		
 		addViews();
 		
@@ -269,9 +281,9 @@ public class MainActivity extends Activity {
 			for (int i = 0; i < backgroundArray.length; i++) {
 				try {
 					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(backgroundURLArray[i]).getContent(), null, options);
-					backgroundArray[i] = bitmap; 
+					backgroundArray[i] = scaleBitmapToDevice(bitmap); 
 					allBackgrounds[i] = backgroundArray[i]; 
-				} catch (Exception e) {
+				} catch (Exception e) { 
 					Log.e(TAG, "error fetching BACKGROUND from URL -" + i, e);
 				}
 			}
@@ -282,7 +294,6 @@ public class MainActivity extends Activity {
 		protected void onPostExecute(Bitmap[] backgroundArray) {
 			for (int i = 0; i < amountToDisplayAtOnce; i++) {
 				try {
-					backgroundArray[i] = scaleBitmapToDevice(backgroundArray[i]);
 					backgroundImageViews[i].setImageBitmap(backgroundArray[i]);
 					backgroundImageViews[i].setPadding(8, 0, 8, 0);
 				} catch (Exception e) {
@@ -313,7 +324,7 @@ public class MainActivity extends Activity {
 			for (int i = 0; i < profiles.length; i++) {
 				try {
 					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(profileURLs[i]).getContent());
-					profiles[i] = bitmap; 
+					profiles[i] = scaleProfileBitmap(bitmap); 
 					allProfiles[i] = profiles[i]; 
 				} catch (Exception e) {
 					Log.e(TAG, "error fetching BACKGROUND from URL -" + i, e);
@@ -451,6 +462,18 @@ public class MainActivity extends Activity {
 		float ratio = (width / height);
 		
 		return Bitmap.createScaledBitmap(inputBitmap, deviceWidth, (int)(deviceWidth / ratio), false);
+	}
+	
+	private Bitmap scaleProfileBitmap(Bitmap inputBitmap) {
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+		int profilePicWidth = (int) (dm.widthPixels/10f);
+		
+		float width = inputBitmap.getWidth();
+		float height = inputBitmap.getHeight();
+		float ratio = (width / height);
+		
+		return Bitmap.createScaledBitmap(inputBitmap, profilePicWidth, (int)(profilePicWidth / ratio), false);
 	}
 	
 //	public class EndlessScrollListener implements OnScrollListener {
