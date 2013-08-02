@@ -10,7 +10,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import android.R.integer;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,7 +30,7 @@ public class MainActivity extends Activity {
 	private static final String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more";
 	private static final String TAG = "MainActivity";
 
-	TextView[] textViews;
+	TextView[] storyViews;
 	TextView[] authorTextViews;
 	ImageView[] flagImageViews;
 	ImageView[] backgroundImageViews;
@@ -48,13 +47,18 @@ public class MainActivity extends Activity {
 	 * 
 	 * Potential max is 12 for now I think.
 	 */
-	int amountToLoad = 3; 
+	int amountToDisplayAtOnce = 4; 
+	int amountToGetTotal = 12;
 	
-	int amountToHold = 12;
 	String[] allStories;
 	String[] allAuthors;
+	Bitmap[] allBackgrounds;
+	Bitmap[] allFlags;
+	Bitmap[] allProfiles;
 	
-	int currentPage = 1;
+	int currentPage = amountToDisplayAtOnce;
+	
+	boolean loading = true;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,15 +82,18 @@ public class MainActivity extends Activity {
 		View myLayout = findViewById(R.id.mainBottomView);
 		
 		// Create the arrays
-		textViews = new TextView[amountToLoad];
-		authorTextViews = new TextView[amountToLoad];
-		flagImageViews = new ImageView[amountToLoad];
-		backgroundImageViews = new ImageView[amountToLoad];
-		profileImageViews = new ImageView[amountToLoad];
+		storyViews = new TextView[amountToDisplayAtOnce];
+		authorTextViews = new TextView[amountToDisplayAtOnce];
+		flagImageViews = new ImageView[amountToDisplayAtOnce];
+		backgroundImageViews = new ImageView[amountToDisplayAtOnce];
+		profileImageViews = new ImageView[amountToDisplayAtOnce];
 		
 		// Create the arrays to hold ALL
-		allStories = new String[amountToHold];
-		allAuthors = new String[amountToHold];
+		allStories = new String[amountToGetTotal];
+		allAuthors = new String[amountToGetTotal];
+		allBackgrounds = new Bitmap[amountToGetTotal];
+		allFlags = new Bitmap[amountToGetTotal];
+		allProfiles = new Bitmap[amountToGetTotal];
 
 		// Set up the LayoutParams
 		LinearLayout.LayoutParams backgroundParams = new LinearLayout.LayoutParams(
@@ -104,7 +111,7 @@ public class MainActivity extends Activity {
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		
 		// Add all the views
-		for (int i = 0; i < amountToLoad; i++) {
+		for (int i = 0; i < amountToDisplayAtOnce; i++) {
 			// Create the new viws
 			TextView text = new TextView(this);
 			TextView author = new TextView(this);
@@ -113,7 +120,7 @@ public class MainActivity extends Activity {
 			ImageView profile = new ImageView(this);
 			
 			// Add them to the arrays
-			textViews[i] = text;
+			storyViews[i] = text;
 			authorTextViews[i] = author;
 			flagImageViews[i] = flag;
 			backgroundImageViews[i] = background; 
@@ -141,82 +148,104 @@ public class MainActivity extends Activity {
 			((LinearLayout) myLayout).addView(text);
 		}
 		
-		Button testButton = (Button) findViewById(R.id.buttonLoadMoreStories);
-		testButton.setText("Testinupp!");
-		testButton.setOnClickListener(new OnClickListener() {
+		// Configure the button
+		Button loadMoreButton = (Button) findViewById(R.id.buttonLoadMoreStories);
+		loadMoreButton.setText("Load more!");
+		loadMoreButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				addPage(false, false, true, false, true);
+				if (loading == false) {
+					addPage(true, true, true, true, true);
+				}
 			}
 		});
-//		((LinearLayout) myLayout).addView(testButton);
 	}
 	
 	private TextView[] addPage(boolean profile, boolean flag, boolean author,
 			boolean background, boolean text) {
 		int storiesPerPage = 4;
 		View myLayout = findViewById(R.id.mainBottomView);
-		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		
+		// Set up the LayoutParams
+		LinearLayout.LayoutParams backgroundParams = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT);
-		params.setMargins(10, 0, 10, 10);
-		TextView[] views = new TextView[storiesPerPage];
+		LinearLayout.LayoutParams layoutParamsBottomPadding = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
+		layoutParamsBottomPadding.setMargins(0, 0, 0, 15);
+		LinearLayout.LayoutParams layoutParamsNoPadding = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
+		LinearLayout.LayoutParams layoutParamsProfile = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
+		
+		TextView[] textViews = new TextView[storiesPerPage];
+		ImageView[] imageViews = new ImageView[storiesPerPage];
 
-		for (int i = 0; i < views.length; i++) {
-			if (profile) {}
-			if (flag) {}
-			
+		for (int i = 0; i < textViews.length; i++) {
+			if (profile) {
+				ImageView view = new ImageView(this);
+				view.setLayoutParams(layoutParamsProfile);
+				view.setImageBitmap(allProfiles[getNextView(i)]);
+				imageViews[i] = view;
+				((LinearLayout) myLayout).addView(view);
+			}
+			if (flag) {
+				ImageView view = new ImageView(this);
+				view.setLayoutParams(layoutParamsNoPadding);
+				view.setImageBitmap(allFlags[getNextView(i)]);
+				imageViews[i] = view;
+				((LinearLayout) myLayout).addView(view);
+			}
 			if (author) {
 				TextView view = new TextView(this);
-				view.setLayoutParams(params);
-				view.setText(getAuthorForView(currentPage, i));
+				view.setLayoutParams(layoutParamsNoPadding);
+				view.setText(Html.fromHtml(allAuthors[getNextView(i)]));
 				view.setTextSize(17);
-				views[i] = view;
+				textViews[i] = view;
 				((LinearLayout) myLayout).addView(view);
 			}
-			if (background) {}
-			
+			if (background) {
+				ImageView view = new ImageView(this);
+				view.setLayoutParams(backgroundParams);
+				view.setImageBitmap(allBackgrounds[getNextView(i)]);
+				imageViews[i] = view;
+				((LinearLayout) myLayout).addView(view);
+			}
 			if (text) {
 				TextView view = new TextView(this);
-				view.setLayoutParams(params);
-				view.setText(getTextForView(currentPage, i));
+				view.setLayoutParams(layoutParamsBottomPadding);
+				view.setText(allStories[getNextView(i)]);
 				view.setTextSize(17);
-				views[i] = view;
+				textViews[i] = view;
 				((LinearLayout) myLayout).addView(view);
 			}
 		}
-		currentPage++;
-		return views;
+		currentPage += storiesPerPage + 1;
+		return textViews;
 	}
 
-	private String getTextForView(int currentPage, int itemnumber) {
-		if (currentPage * (itemnumber + 1) >= 12) {
-			currentPage = 1;
-			itemnumber = 0;
+	private int getNextView(int itemNumber) {
+		if (currentPage + itemNumber >= 12) {
+			currentPage = 0;
 		}
-		return allStories[currentPage * (itemnumber + 1)];
-	}
-	
-	private String getAuthorForView(int currentPage, int itemnumber) {
-		if (currentPage * (itemnumber + 1) >= 12) {
-			currentPage = 1;
-			itemnumber = 0;
-		}
-		return allAuthors[currentPage * (itemnumber + 1)];
+		return (currentPage + itemNumber);
 	}
 
 	class BackgroundLoader extends AsyncTask<String, Void, Bitmap[]> {
 		@Override
 		protected Bitmap[] doInBackground(String... params) {	
-			Bitmap[] backgroundArray = new Bitmap[amountToLoad];
-			String[] backgroundURLArray = new String[amountToLoad];
+			Bitmap[] backgroundArray = new Bitmap[amountToGetTotal];
+			String[] backgroundURLArray = new String[amountToGetTotal];
 			
 			try {
 				Document doc = Jsoup.connect(API_URL).get();
 				Elements uRLElements = doc.select("[style^=background-image:url(']");
 				int backgroundCounter = 0;
-				for (int i = 0; i < (amountToLoad * 2); i++) {
+				for (int i = 0; i < (amountToGetTotal * 2); i++) {
 					try {
 						String uRlString = uRLElements.get(i).toString();
 						uRlString = uRlString.substring(73);
@@ -241,6 +270,7 @@ public class MainActivity extends Activity {
 				try {
 					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(backgroundURLArray[i]).getContent(), null, options);
 					backgroundArray[i] = bitmap; 
+					allBackgrounds[i] = backgroundArray[i]; 
 				} catch (Exception e) {
 					Log.e(TAG, "error fetching BACKGROUND from URL -" + i, e);
 				}
@@ -250,7 +280,7 @@ public class MainActivity extends Activity {
 		
 		@Override
 		protected void onPostExecute(Bitmap[] backgroundArray) {
-			for (int i = 0; i < backgroundImageViews.length; i++) {
+			for (int i = 0; i < amountToDisplayAtOnce; i++) {
 				try {
 					backgroundArray[i] = scaleBitmapToDevice(backgroundArray[i]);
 					backgroundImageViews[i].setImageBitmap(backgroundArray[i]);
@@ -259,19 +289,20 @@ public class MainActivity extends Activity {
 					Log.e(TAG, "Can't scale Bitmap, probable cause: picture missing from the story!", e);
 				}
 			}
+			loading = false;
 		}
 	}
 	
 	class ProfilePictureLoader extends AsyncTask<String, Void, Bitmap[]> {
 		@Override
 		protected Bitmap[] doInBackground(String... params) {	
-			Bitmap[] profiles = new Bitmap[amountToLoad];
-			String[] profileURLs = new String[amountToLoad];
+			Bitmap[] profiles = new Bitmap[amountToGetTotal];
+			String[] profileURLs = new String[amountToGetTotal];
 			try {
 				Document doc = Jsoup.connect(API_URL).get();
+				Elements pics = doc.select("img");
 				for (int i = 0; i < profiles.length; i++) {
-					Element pic = doc.select("img").get(i);
-					String url = pic.absUrl("src");
+					String url = pics.get(i).absUrl("src");
 					System.out.println(url);
 					profileURLs[i] = url; 
 				}
@@ -283,6 +314,7 @@ public class MainActivity extends Activity {
 				try {
 					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(profileURLs[i]).getContent());
 					profiles[i] = bitmap; 
+					allProfiles[i] = profiles[i]; 
 				} catch (Exception e) {
 					Log.e(TAG, "error fetching BACKGROUND from URL -" + i, e);
 				}
@@ -292,7 +324,7 @@ public class MainActivity extends Activity {
 		
 		@Override
 		protected void onPostExecute(Bitmap[] profiles) {
-			for (int i = 0; i < backgroundImageViews.length; i++) {
+			for (int i = 0; i < amountToDisplayAtOnce; i++) {
 				try {
 					profileImageViews[i].setImageBitmap(profiles[i]);
 					profileImageViews[i].setPadding(8, 0, 8, 0);
@@ -305,25 +337,18 @@ public class MainActivity extends Activity {
 
 	class StoryLoader extends AsyncTask<String, Void, String[]> {
 		protected void onPreExecute() {
-			textViews[0].setTextSize(25f);
-			textViews[0].setText("Loading stories...");
+			storyViews[0].setTextSize(25f);
+			storyViews[0].setText("Loading stories...");
 		}
 		
 		protected String[] doInBackground(String... urls) {
 			try {
 				Document doc = Jsoup.connect(API_URL).get();
-				String[] textArray = new String[amountToLoad];
-
-				for (int i = 0; i < textArray.length; i++) {
-					Element textElement = doc.select("H3").get(i);
-					textArray[i] = textElement.text();
-				}
-				
-				// A separate array since sometimes we want to load
-				// less than 12 in the "main" part.
+				String[] textArray = new String[amountToGetTotal];
+				Elements textElements = doc.select("H3");
 				for (int i = 0; i < 12; i++) {
-					Element textElement = doc.select("H3").get(i);
-					allStories[i] = textElement.text(); 
+					textArray[i] = textElements.get(i).text();
+					allStories[i] = textArray[i];
 				}
 
 				return textArray;
@@ -335,10 +360,10 @@ public class MainActivity extends Activity {
 
 		protected void onPostExecute(String[] result) {
 			if (result != null) {
-				for (int i = 0; i < textViews.length; i++) {
-					textViews[i].setText(result[i]);
-					textViews[i].setTextSize(17f);
-					textViews[i].setPadding(10, 0, 10, 0);
+				for (int i = 0; i < amountToDisplayAtOnce; i++) {
+					storyViews[i].setText(result[i]);
+					storyViews[i].setTextSize(17f);
+					storyViews[i].setPadding(10, 0, 10, 0);
 				}
 			}
 		}
@@ -352,20 +377,16 @@ public class MainActivity extends Activity {
 		protected String[] doInBackground(String... urls) {
 			try {
 				Document doc = Jsoup.connect(API_URL).get();
-				String[] authorArray = new String[amountToLoad];
-
-				for (int i = 0; i < authorArray.length; i++) {							
-					Element authorElement = doc.select("[class=user_link]").get(i);
-					Element countryElement = doc.select("[class=browse_story_location with_countryflag_icon]").get(i);
-					authorArray[i] = "<big>" +"<i>" + authorElement.text() +"</i>" + "</big>\n" + "<br />" + countryElement.text();
+				String[] authorArray = new String[amountToGetTotal];
+				Elements authorElements = doc.select("[class=user_link]");
+				Elements countryElements = doc.select("[class=browse_story_location with_countryflag_icon]");
+				for (int i = 0; i < authorArray.length; i++) {
+					authorArray[i] = "<big>" + "<i>"
+							+ authorElements.get(i).text() 
+							+ "</i>" + "</big>\n" + "<br />"
+							+ countryElements.get(i).text();
+					allAuthors[i] = authorArray[i];
 				}
-				// A separate array since sometimes we want to load
-				// less than 12 in the "main" part.
-				for (int i = 0; i < 12; i++) {
-					Element authorElement = doc.select("[class=user_link]").get(i);
-					allAuthors[i] = authorElement.text(); 
-				}
-				
 				return authorArray;
 			} catch (Exception e) {
 				Log.e(TAG, "error fetching AUTHOR from server", e);
@@ -375,7 +396,7 @@ public class MainActivity extends Activity {
 
 		protected void onPostExecute(String[] result) {
 			if (result != null) {
-				for (int i = 0; i < authorTextViews.length; i++) {
+				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					authorTextViews[i].setText(Html.fromHtml(result[i]));
 					authorTextViews[i].setTextSize(15f);
 					authorTextViews[i].setPadding(10, 0, 10, 0);
@@ -388,12 +409,10 @@ public class MainActivity extends Activity {
 		protected Bitmap[] doInBackground(String... params) {
 			try {
 				Document doc = Jsoup.connect(API_URL).get();
-				Bitmap[] flagArray = new Bitmap[amountToLoad];
-
+				Bitmap[] flagArray = new Bitmap[amountToGetTotal];
+				Elements imageElements = doc.select("[style*=flags/mini]");
 				for (int i = 0; i < flagArray.length; i++) {
-					Element imageElement = doc.select("[style*=flags/mini]").get(i);
-					String imageCode = imageElement.toString().substring(125, 131);
-
+					String imageCode = imageElements.get(i).toString().substring(125, 131);
 					URL imageUrl = new URL("http://culture-shock.me/img/icons/flags/mini/" + imageCode);
 					URLConnection conn = imageUrl.openConnection();
 					conn.connect();
@@ -401,6 +420,8 @@ public class MainActivity extends Activity {
 					InputStream is = conn.getInputStream();
 					BufferedInputStream bis = new BufferedInputStream(is);
 					flagArray[i] = BitmapFactory.decodeStream(bis);
+					allFlags[i] = flagArray[i];
+					
 					bis.close();
 					is.close();
 				}
@@ -413,7 +434,7 @@ public class MainActivity extends Activity {
 
 		protected void onPostExecute(Bitmap[] result) {
 			if (result != null) {
-				for (int i = 0; i < flagImageViews.length; i++) {
+				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					flagImageViews[i].setImageBitmap(result[i]); 
 				}
 			}
