@@ -9,7 +9,8 @@
         android:layout_height="wrap_content"
         android:background="@drawable/activity_info_header" >
 
-        <ImageView
+        <ImageButton
+            android:id="@+id/button_main"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginLeft="14dp"
