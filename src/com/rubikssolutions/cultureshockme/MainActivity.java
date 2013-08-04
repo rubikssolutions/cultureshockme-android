@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
 		addViews();
 		
 //		new ProfilePictureLoader().execute();
-		callAsynchronousTask();
+		loadMoreStories();
 //		new AuthorLoader().execute();
 //		new FlagLoader().execute(); 
 //		new BackgroundLoader().execute();		
@@ -167,7 +167,9 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				if (loading == false) {
-					callAsynchronousTask();
+					API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit=" + currentPage;
+					Log.i(TAG, currentPage + "== current page");
+					loadMoreStories();
 					addPage(true, true, true, true, true);
 				}
 			}
@@ -179,22 +181,22 @@ public class MainActivity extends Activity {
 		View myLayout = findViewById(R.id.mainBottomView);
 		
 		// Set up the LayoutParams
-//		LinearLayout.LayoutParams backgroundParams = new LinearLayout.LayoutParams(
-//				LinearLayout.LayoutParams.MATCH_PARENT,
-//				LinearLayout.LayoutParams.MATCH_PARENT);
+		LinearLayout.LayoutParams backgroundParams = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.MATCH_PARENT);
 		LinearLayout.LayoutParams layoutParamsBottomPadding = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		layoutParamsBottomPadding.setMargins(0, 0, 0, 15);
-//		LinearLayout.LayoutParams layoutParamsNoPadding = new LinearLayout.LayoutParams(
-//				LinearLayout.LayoutParams.MATCH_PARENT,
-//				LinearLayout.LayoutParams.WRAP_CONTENT);
-//		LinearLayout.LayoutParams layoutParamsProfile = new LinearLayout.LayoutParams(
-//				LinearLayout.LayoutParams.WRAP_CONTENT,
-//				LinearLayout.LayoutParams.WRAP_CONTENT);
+		LinearLayout.LayoutParams layoutParamsNoPadding = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
+		LinearLayout.LayoutParams layoutParamsProfile = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
 		
 		TextView[] textViews = new TextView[amountToDisplayAtOnce];
-//		ImageView[] imageViews = new ImageView[storiesPerPage];
+		ImageView[] imageViews = new ImageView[amountToDisplayAtOnce];
 
 		for (int i = 0; i < textViews.length; i++) {
 //			if (profile) {
@@ -211,14 +213,16 @@ public class MainActivity extends Activity {
 //				imageViews[i] = view;
 //				((LinearLayout) myLayout).addView(view);
 //			}
-//			if (author) {
-//				TextView view = new TextView(this);
-//				view.setLayoutParams(layoutParamsNoPadding);
-//				view.setText(Html.fromHtml(allAuthors[getNextView(i)]));
-//				view.setTextSize(17);
-//				textViews[i] = view;
-//				((LinearLayout) myLayout).addView(view);
-//			}
+			if (author) {
+				TextView view = new TextView(this);
+				view.setLayoutParams(layoutParamsNoPadding);
+				view.setText(Html.fromHtml(allAuthors[i]));
+				view.setTextSize(15);
+				view.setBackgroundColor(Color.WHITE);
+				view.setPadding(10, 0, 10, 0);
+				textViews[i] = view;
+				((LinearLayout) myLayout).addView(view);
+			}
 //			if (background) {
 //				ImageView view = new ImageView(this);
 //				view.setLayoutParams(backgroundParams);
@@ -231,20 +235,15 @@ public class MainActivity extends Activity {
 				view.setLayoutParams(layoutParamsBottomPadding);
 				view.setText(allStories[i]);
 				view.setTextSize(17);
+				view.setBackgroundColor(Color.WHITE);
+				view.setPadding(10, 0, 10, 0);
 				textViews[i] = view;
 				((LinearLayout) myLayout).addView(view);
 			}
 		}
 		currentPage += amountToDisplayAtOnce;
 	}
-
-	private int getNextView(int itemNumber) {
-		if (currentPage + itemNumber >= 12) {
-			currentPage = 0;
-		}
-		return (currentPage + itemNumber);
-	}
-
+	
 	class BackgroundLoader extends AsyncTask<String, Void, Bitmap[]> {
 		@Override
 		protected Bitmap[] doInBackground(String... params) {	
@@ -355,12 +354,10 @@ public class MainActivity extends Activity {
 				Document doc = Jsoup.connect(API_URL).get();
 				String[] textArray = new String[amountToDisplayAtOnce];
 				Elements textElements = doc.select("H3");
-				for (int i = currentPage; i < (currentPage + amountToDisplayAtOnce); i++) {
-					System.out.println(i + " stories");
+				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					textArray[i] = textElements.get(i).text();
 					allStories[i] = textArray[i];
 				}
-
 				return textArray;
 			} catch (Exception e) {
 				Log.e(TAG, "error fetching TEXT from server", e);
@@ -387,10 +384,10 @@ public class MainActivity extends Activity {
 		protected String[] doInBackground(String... urls) {
 			try {
 				Document doc = Jsoup.connect(API_URL).get();
-				String[] authorArray = new String[amountToGetTotal];
+				String[] authorArray = new String[amountToDisplayAtOnce];
 				Elements authorElements = doc.select("[class=user_link]");
 				Elements countryElements = doc.select("[class=browse_story_location with_countryflag_icon]");
-				for (int i = 0; i < authorArray.length; i++) {
+				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					authorArray[i] = "<big>" + "<i>"
 							+ authorElements.get(i).text() 
 							+ "</i>" + "</big>\n" + "<br />"
@@ -474,60 +471,25 @@ public class MainActivity extends Activity {
 		
 		return Bitmap.createScaledBitmap(inputBitmap, profilePicWidth, (int)(profilePicWidth / ratio), false);
 	}
-	
-	public void callAsynchronousTask() {
-	    final Handler handler = new Handler();
-	    Timer timer = new Timer();
-	    TimerTask doAsynchronousTask = new TimerTask() {       
-	        @Override
-	        public void run() {
-	            handler.post(new Runnable() {
-	                public void run() {       
-	                    try {
-	                        new getNextStories().execute();
-	                    } catch (Exception e) {
-	                    	Log.e(TAG, "Could not execute storyloader", e);
-	                    }
-	                }
-	            });
-	        }
-	    };
-	    timer.schedule(doAsynchronousTask, 0);
-	}
-	
-	class getNextStories extends AsyncTask<String, Void, String[]> {
-		protected void onPreExecute() {
-			storyViews[0].setTextSize(25f);
-			storyViews[0].setText("Loading stories...");
-		}
-		
-		protected String[] doInBackground(String... urls) {
-			try {
-				Log.i(TAG, currentPage + "== current page");
-				API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit=" + currentPage;
-				Document doc = Jsoup.connect(API_URL).get();
-				String[] textArray = new String[amountToDisplayAtOnce];
-				Elements textElements = doc.select("H3");
-				for (int i = 0; i < amountToDisplayAtOnce; i++) {
-					textArray[i] = textElements.get(i).text();
-					allStories[i] = textArray[i];
-				}
-				return textArray;
-			} catch (Exception e) {
-				Log.e(TAG, "error fetching TEXT from server", e);
-				return null;
-			}
-		}
 
-		protected void onPostExecute(String[] result) {
-			if (result != null) {
-				for (int i = 0; i < amountToDisplayAtOnce; i++) {
-					storyViews[i].setText(result[i]);
-					storyViews[i].setTextSize(17f);
-					storyViews[i].setPadding(10, 0, 10, 0);
-				}
+	public void loadMoreStories() {
+		final Handler handler = new Handler();
+		Timer timer = new Timer();
+		TimerTask doAsynchronousTask = new TimerTask() {
+			@Override
+			public void run() {
+				handler.post(new Runnable() {
+					public void run() {
+						try {
+							new AuthorLoader().execute();
+							new StoryLoader().execute();
+						} catch (Exception e) {
+							Log.e(TAG, "Could not execute storyloader", e);
+						}
+					}
+				});
 			}
-		}
+		};
+		timer.schedule(doAsynchronousTask, 0);
 	}
-
 }
