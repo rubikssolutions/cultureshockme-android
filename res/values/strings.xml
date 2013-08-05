@@ -9,5 +9,6 @@
     <string name="info_email">contact@rubikssolutions.com</string>
     <string name="info_company_name">Rubik’s Solutions</string>
     <string name="info_logo">Rubik’s Solutions logo</string>
+    <string name="info_github">https://github.com/rubikssolutions/cultureshockme-android</string>
 
 </resources>

@@ -112,6 +112,7 @@ public class MainActivity extends Activity {
 		
 		addViews();
 		loadMoreStories(true, true, true, true, true);	
+		currentPage += amountToDisplayAtOnce;
 	
 		loading = false;
 	}
