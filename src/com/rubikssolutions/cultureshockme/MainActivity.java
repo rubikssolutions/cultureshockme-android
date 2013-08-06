@@ -36,12 +36,6 @@ public class MainActivity extends Activity {
 	private static final String LOADING = "Currently loading...";
 	private static final String DONE_LOADING = "Show me more stories!";
 
-	TextView[] storyViews;
-	TextView[] authorTextViews;
-	ImageView[] flagImageViews;
-	ImageView[] backgroundImageViews;
-	ImageView[] profileImageViews;
-
 	int counter = 0;
 	
 	int deviceWidth = 240;
@@ -65,13 +59,6 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		// Create the arrays
-		storyViews = new TextView[amountToDisplayAtOnce];
-		authorTextViews = new TextView[amountToDisplayAtOnce];
-		flagImageViews = new ImageView[amountToDisplayAtOnce];
-		backgroundImageViews = new ImageView[amountToDisplayAtOnce];
-		profileImageViews = new ImageView[amountToDisplayAtOnce];
 
 		// Create the arrays to hold ALL
 		allStories = new String[amountToDisplayAtOnce];
@@ -110,64 +97,10 @@ public class MainActivity extends Activity {
 			}
 		});
 		
-		addViews();
 		loadMoreStories(true, true, true, true, true);	
 		currentPage += amountToDisplayAtOnce;
 	
 		loading = false;
-	}
-	
-	private void addViews () {		
-		View myLayout = findViewById(R.id.mainBottomView);
-
-		// Set up the LayoutParams
-		LinearLayout.LayoutParams backgroundParams = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT,
-				LinearLayout.LayoutParams.MATCH_PARENT);
-		LinearLayout.LayoutParams layoutParamsBottomPadding = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT,
-				LinearLayout.LayoutParams.MATCH_PARENT);
-		layoutParamsBottomPadding.setMargins(0, 0, 0, 15);
-		LinearLayout.LayoutParams layoutParamsNoPadding = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-		LinearLayout.LayoutParams layoutParamsProfile = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-		
-		// Add all the views
-		for (int i = 0; i < 1; i++) {
-			// Create the new views
-			TextView text = new TextView(this);
-			TextView author = new TextView(this);
-			ImageView flag = new ImageView(this);
-			ImageView background = new ImageView(this);
-			ImageView profile = new ImageView(this);
-			
-			// Add them to the arrays
-			storyViews[i] = text;
-			authorTextViews[i] = author;
-			flagImageViews[i] = flag;
-			backgroundImageViews[i] = background; 
-			profileImageViews[i] = profile; 
-			
-			// Set the layout parameters
-			profile.setLayoutParams(layoutParamsProfile);
-			author.setLayoutParams(layoutParamsNoPadding);
-			flag.setLayoutParams(layoutParamsNoPadding);
-			flag.setPadding(0, 0, 0, 5);
-			background.setLayoutParams(backgroundParams);
-			background.setAdjustViewBounds(true);			
-			text.setLayoutParams(layoutParamsBottomPadding);
-
-			// Set the background color
-			author.setBackgroundColor(Color.WHITE);
-			background.setBackgroundColor(Color.WHITE);
-			text.setBackgroundColor(Color.WHITE);
-			
-			// The order in which to display the items
-			((LinearLayout) myLayout).addView(text);
-		}
 	}
 	
 	private void addPage(boolean profile, boolean flag, boolean author,
@@ -335,12 +268,7 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	class StoryLoader extends AsyncTask<String, Void, String[]> {
-		protected void onPreExecute() {
-			storyViews[0].setTextSize(25f);
-			storyViews[0].setText("Loading stories...");
-		}
-		
+	class StoryLoader extends AsyncTask<String, Void, String[]> {		
 		protected String[] doInBackground(String... urls) {
 			try {
 				String[] textArray = new String[amountToDisplayAtOnce];
@@ -365,10 +293,6 @@ public class MainActivity extends Activity {
 	}
 
 	class AuthorLoader extends AsyncTask<String, Void, String[]> {
-		protected void onPreExecute() {
-			authorTextViews[0].setText("Loading authors...");
-		}
-		
 		protected String[] doInBackground(String... urls) {
 			try {
 				String[] authorArray = new String[amountToDisplayAtOnce];
@@ -439,5 +363,4 @@ public class MainActivity extends Activity {
 		
 		return Bitmap.createScaledBitmap(inputBitmap, profilePicWidth, (int)(profilePicWidth / ratio), false);
 	}
-
 }
