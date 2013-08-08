@@ -119,6 +119,7 @@ public class MainActivity extends Activity {
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 					RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
+			lp.setMargins(0, 0, 0, 20);
 			if (profile) {
 				ImageView view = new ImageView(this);
 				lp.addRule(RelativeLayout.BELOW, (viewId - 1));

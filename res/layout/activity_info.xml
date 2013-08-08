@@ -114,8 +114,12 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/info_company_name"
                 android:adjustViewBounds="true"
-                android:paddingTop="10dp"
+                android:paddingTop="35dp"
                 android:paddingBottom="10dp"
+                android:paddingLeft="13dp"
+                android:paddingRight="13dp"
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
                 android:src="@drawable/logo_rubiks_wide" />
         </LinearLayout>
     </ScrollView>

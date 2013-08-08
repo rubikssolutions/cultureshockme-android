@@ -7,7 +7,6 @@
 
     <!-- Info screen -->
     <string name="info_company_name">Rubik’s Solutions</string>
-    <string name="info_logo">Rubik’s Solutions logo</string>
     <string name="info_greeting">Hey fellow AIESECer!</string>
     <string name="info_description">We are glad to see you using our first simple alpha version of the Culture Shock App. We - the people behind this app - are former AIESECers ourselves and we are very happy to have the chance to give something back to the network! \n\nIf you are an AIESEC enthusiast like we are, you could also give a helping hand - first of all, by checking out the app and testing it and the future, updated versions of it. \n\nBut if you have a technical background you could look at our code and write some of your own (we are especially interested in iOS ninjas) - our code is fully open source. And if you enjoy working with us you might even want to join our AIESEC-minded international team. \n\nBut let\'s not rush into things - we are already incredibly glad to see you trying out our app, and we hope that you like it! \nStay tuned for future updates!</string>
     <string name="info_description_farewell">See you soon!\nErik (MC Estonia 2010)\nDaniel (AIESEC Brazil 2007)\nRauno (future AIESECer :) )</string>

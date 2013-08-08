@@ -42,7 +42,6 @@
                 android:contentDescription="@string/action_settings" />
 
             <ImageView
-                android:id="@+id/imageView1"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:layout_alignParentLeft="true"
@@ -84,6 +83,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_horizontal"
+                    android:textSize="17sp"
                     android:text="@string/button_load_more" />
             </LinearLayout>
         </ScrollView>
