@@ -13,7 +13,7 @@ public class InfoScreen extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_info);		
-		ImageButton mainButton = (ImageButton) findViewById(R.id.button_main);
+		ImageButton mainButton = (ImageButton) findViewById(R.id.button_logo);
 		mainButton.setOnClickListener(new OnClickListener() {
 			
 			@Override

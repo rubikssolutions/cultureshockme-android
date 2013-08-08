@@ -27,7 +27,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
@@ -50,6 +50,8 @@ public class MainActivity extends Activity {
 	Bitmap[] allProfiles;
 	
 	int currentPage = 0;
+	
+	int viewId = 1;
 	
 	boolean loading = true;
 	boolean loadMoreButtonIsEnabled = false;
@@ -102,71 +104,54 @@ public class MainActivity extends Activity {
 	
 		loading = false;
 	}
-	
+
 	private void addPage(boolean profile, boolean flag, boolean author,
 			boolean background, boolean text) {
-		View myLayout = findViewById(R.id.mainBottomView);
-		
-		// Set up the LayoutParams
-		LinearLayout.LayoutParams backgroundParams = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT,
-				LinearLayout.LayoutParams.MATCH_PARENT);
-		LinearLayout.LayoutParams layoutParamsBottomPadding = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-		layoutParamsBottomPadding.setMargins(0, 0, 0, 15);
-		LinearLayout.LayoutParams layoutParamsNoPadding = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-		LinearLayout.LayoutParams layoutParamsProfile = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-		
+		RelativeLayout wrapper = (RelativeLayout) findViewById(R.id.mainFeedView);
+		RelativeLayout inflatedView;
+
 		TextView[] textViews = new TextView[amountToDisplayAtOnce];
 		ImageView[] imageViews = new ImageView[amountToDisplayAtOnce];
 
 		for (int i = 0; i < amountToDisplayAtOnce; i++) {
+			inflatedView = (RelativeLayout) View.inflate(this, R.layout.add_story, null);
+			inflatedView.setId(viewId);
+			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT);
 			if (profile) {
 				ImageView view = new ImageView(this);
-				view.setLayoutParams(layoutParamsProfile);
+				lp.addRule(RelativeLayout.BELOW, (viewId - 1));
 				view.setImageBitmap(allProfiles[i]);
 				imageViews[i] = view;
-				((LinearLayout) myLayout).addView(view);
-			}
-			if (flag) {
-				ImageView view = new ImageView(this);
-				view.setLayoutParams(layoutParamsNoPadding);
-				view.setImageBitmap(allFlags[i]);
-				imageViews[i] = view;
-				((LinearLayout) myLayout).addView(view);
+				((ImageView) inflatedView.findViewById(R.id.viewProfilePicture)).setImageBitmap(allProfiles[i]);
 			}
 			if (author) {
 				TextView view = new TextView(this);
-				view.setLayoutParams(layoutParamsNoPadding);
 				view.setText(Html.fromHtml(allAuthors[i]));
 				view.setTextSize(15);
 				view.setBackgroundColor(Color.WHITE);
 				view.setPadding(10, 0, 10, 0);
 				textViews[i] = view;
-				((LinearLayout) myLayout).addView(view);
+				((TextView) inflatedView.findViewById(R.id.viewAuthorText)).setText(Html.fromHtml(allAuthors[i]));
 			}
 			if (background) {
 				ImageView view = new ImageView(this);
-				view.setLayoutParams(backgroundParams);
 				view.setImageBitmap(allBackgrounds[i]);
 				imageViews[i] = view;
-				((LinearLayout) myLayout).addView(view);
+				((ImageView) inflatedView.findViewById(R.id.viewBackgroundPicture)).setImageBitmap(allBackgrounds[i]);	
 			}
 			if (text) {
 				TextView view = new TextView(this);
-				view.setLayoutParams(layoutParamsBottomPadding);
 				view.setText(allStories[i]);
 				view.setTextSize(17);
 				view.setBackgroundColor(Color.WHITE);
 				view.setPadding(10, 0, 10, 0);
 				textViews[i] = view;
-				((LinearLayout) myLayout).addView(view);
+				((TextView) inflatedView.findViewById(R.id.viewStoryText)).setText(Html.fromHtml(allStories[i]));
 			}
+			wrapper.addView(inflatedView, lp);
+			viewId++;
 		}
 		currentPage += amountToDisplayAtOnce;
 	}
@@ -226,7 +211,7 @@ public class MainActivity extends Activity {
 			}
 			
 			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inSampleSize = 4;
+			options.inSampleSize = 1;
 			for (int i = 0; i < amountToDisplayAtOnce; i++) {
 				try {
 					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(backgroundURLArray[i]).getContent(), null, options);
