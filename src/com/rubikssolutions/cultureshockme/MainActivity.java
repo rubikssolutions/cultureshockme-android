@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
 	
 	int deviceWidth = 240;
 
-	int amountToDisplayAtOnce = 4; 
+	int amountToDisplayAtOnce = 2; 
 	int amountToGetTotal = 12;
 	
 	String[] allStories;
@@ -211,7 +211,7 @@ public class MainActivity extends Activity {
 			}
 			
 			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inSampleSize = 1;
+			options.inSampleSize = 4;
 			for (int i = 0; i < amountToDisplayAtOnce; i++) {
 				try {
 					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(backgroundURLArray[i]).getContent(), null, options);
