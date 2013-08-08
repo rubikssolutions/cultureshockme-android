@@ -61,6 +61,10 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+//		int memClass = ( ( ActivityManager ) getSystemService( Context.ACTIVITY_SERVICE ) ).getMemoryClass();
+//		int cacheSize = 1024 * 1024 * memClass / 8;
+//		LruCache cache = new LruCache<String, Bitmap>( cacheSize );
 
 		// Create the arrays to hold ALL
 		allStories = new String[amountToDisplayAtOnce];
@@ -241,9 +245,11 @@ public class MainActivity extends Activity {
 				Log.e(TAG, "error connecting to server", e);
 			}
 			
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inSampleSize = 8;
 			for (int i = 0; i < amountToDisplayAtOnce; i++) {
 				try {
-					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(profileURLs[i]).getContent());
+					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(profileURLs[i]).getContent(), null, options);
 					profiles[i] = scaleProfileBitmap(bitmap); 
 					allProfiles[i] = profiles[i]; 
 				} catch (Exception e) {
