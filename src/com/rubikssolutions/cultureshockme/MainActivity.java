@@ -36,12 +36,7 @@ public class MainActivity extends Activity {
 	private static final String LOADING = "Currently loading...";
 	private static final String DONE_LOADING = "Show me more stories!";
 
-	int counter = 0;
-	
-	int deviceWidth = 240;
-
-	int amountToDisplayAtOnce = 2; 
-	int amountToGetTotal = 12;
+	int amountToDisplayAtOnce = 3; 
 	
 	String[] allStories;
 	String[] allAuthors;
@@ -217,6 +212,13 @@ public class MainActivity extends Activity {
 			
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inSampleSize = 4;
+			
+			// Not excactly sure what all these do, a bit dangerous
+			options.inScaled = false;
+			options.inPurgeable = true;
+			options.inInputShareable = true;
+			// Not excactly sure what all these do, a bit dangerous
+			
 			for (int i = 0; i < amountToDisplayAtOnce; i++) {
 				try {
 					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(backgroundURLArray[i]).getContent(), null, options);
@@ -247,11 +249,19 @@ public class MainActivity extends Activity {
 			
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inSampleSize = 8;
+			
+			// Not excactly sure what all these do, a bit dangerous
+			options.inScaled = false;
+			options.inPurgeable = true;
+			options.inInputShareable = true;
+			// Not excactly sure what all these do, a bit dangerous
+			
 			for (int i = 0; i < amountToDisplayAtOnce; i++) {
 				try {
-					Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(profileURLs[i]).getContent(), null, options);
-					profiles[i] = scaleProfileBitmap(bitmap); 
-					allProfiles[i] = profiles[i]; 
+					profiles[i] = scaleProfileBitmap(BitmapFactory
+							.decodeStream((InputStream) new URL(profileURLs[i])
+									.getContent(), null, options));
+					allProfiles[i] = profiles[i];
 				} catch (Exception e) {
 					Log.e(TAG, "error fetching BACKGROUND from URL -" + i, e);
 				}
