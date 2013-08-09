@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:background="#FFFFFF"
     android:layout_height="match_parent" >
 
     <ImageView
         android:id="@+id/viewProfilePicture"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="#FFFFFF"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:contentDescription="@string/action_settings"
         android:src="@drawable/button_info" />
 
@@ -17,7 +19,6 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/viewProfilePicture"
         android:layout_toRightOf="@id/viewProfilePicture"
-        android:background="#FFFFFF"
         android:textIsSelectable="false"
         android:textSize="15sp" />
 
@@ -28,7 +29,6 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@id/viewAuthorText"
-        android:background="#FFFFFF"
         android:contentDescription="@string/action_settings" />
 
     <TextView
@@ -40,7 +40,6 @@
         android:layout_below="@id/viewBackgroundPicture"
         android:layout_toEndOf="@id/viewProfilePicture"
         android:layout_toRightOf="@id/viewProfilePicture"
-        android:background="#FFFFFF"
         android:textIsSelectable="false"
         android:textSize="17sp" />
 
