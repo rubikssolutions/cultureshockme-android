@@ -1,9 +1,7 @@
 package com.rubikssolutions.cultureshockme;
 
-import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -41,7 +39,6 @@ public class MainActivity extends Activity {
 	String[] allStories;
 	String[] allAuthors;
 	Bitmap[] allBackgrounds;
-	Bitmap[] allFlags;
 	Bitmap[] allProfiles;
 	
 	int currentPage = 0;
@@ -61,7 +58,6 @@ public class MainActivity extends Activity {
 		allStories = new String[amountToDisplayAtOnce];
 		allAuthors = new String[amountToDisplayAtOnce];
 		allBackgrounds = new Bitmap[amountToDisplayAtOnce];
-		allFlags = new Bitmap[amountToDisplayAtOnce];
 		allProfiles = new Bitmap[amountToDisplayAtOnce];
 
 		ImageButton infoButton = (ImageButton) findViewById(R.id.button_info);
@@ -90,19 +86,19 @@ public class MainActivity extends Activity {
 							+ currentPage;
 					Log.i(TAG, currentPage + "== current page");
 					Log.i(TAG, API_URL);
-					loadMoreStories(true, true, true, true, true);
-					addPage(true, true, true, true, true);
+					loadMoreStories(true, true, true, true);
+					addPage(true, true, true, true);
 				}
 			}
 		});
 
-		loadMoreStories(true, true, true, true, true);
+		loadMoreStories(true, true, true, true);
 		currentPage += amountToDisplayAtOnce;
 
 		loading = false;
 	}
 
-	private void addPage(boolean profile, boolean flag, boolean author,
+	private void addPage(boolean profile, boolean author,
 			boolean background, boolean text) {
 		RelativeLayout wrapper = (RelativeLayout) findViewById(R.id.mainFeedView);
 		RelativeLayout inflatedView;
@@ -160,8 +156,8 @@ public class MainActivity extends Activity {
 		currentPage += amountToDisplayAtOnce;
 	}
 
-	public void loadMoreStories(final boolean profile, final boolean flag,
-			final boolean author, final boolean background, final boolean text) {
+	public void loadMoreStories(final boolean profile, final boolean author,
+			final boolean background, final boolean text) {
 		final Handler handler = new Handler();
 		Timer timer = new Timer();
 		TimerTask doAsynchronousTask = new TimerTask() {
@@ -172,9 +168,6 @@ public class MainActivity extends Activity {
 						try {
 							if (profile) {
 								new ProfilePictureLoader().execute();
-							}
-							if (flag) {
-								new FlagLoader().execute();
 							}
 							if (author) {
 								new AuthorLoader().execute();
@@ -240,7 +233,6 @@ public class MainActivity extends Activity {
 							(InputStream) new URL(backgroundURLArray[i])
 									.getContent(), null, options));
 					backgroundArray[i] = bitmap;
-//					bitmap.recycle();
 					allBackgrounds[i] = backgroundArray[i];
 				} catch (Exception e) {
 					Log.e(TAG, "error fetching BACKGROUND from URL -" + i, e);
@@ -279,7 +271,6 @@ public class MainActivity extends Activity {
 							.decodeStream((InputStream) new URL(profileURLs[i])
 									.getContent(), null, options));
 					profiles[i] = bitmap;
-//					bitmap.recycle();
 					allProfiles[i] = profiles[i];
 				} catch (Exception e) {
 					Log.e(TAG, "error fetching BACKGROUND from URL -" + i, e);
@@ -336,37 +327,6 @@ public class MainActivity extends Activity {
 				Log.e(TAG, "error fetching AUTHOR from server", e);
 				return null;
 			}
-		}
-	}
-
-	class FlagLoader extends AsyncTask<String, Integer, Bitmap[]> {
-		protected Bitmap[] doInBackground(String... params) {
-			try {
-				Bitmap[] flagArray = new Bitmap[amountToDisplayAtOnce];
-				Elements imageElements = Jsoup.connect(API_URL).get()
-						.select("[style*=flags/mini]");
-				for (int i = 0; i < amountToDisplayAtOnce; i++) {
-					String imageCode = imageElements.get(i).toString()
-							.substring(125, 131);
-					URL imageUrl = new URL(
-							"http://culture-shock.me/img/icons/flags/mini/"
-									+ imageCode);
-					URLConnection conn = imageUrl.openConnection();
-					conn.connect();
-
-					InputStream is = conn.getInputStream();
-					BufferedInputStream bis = new BufferedInputStream(is);
-					flagArray[i] = BitmapFactory.decodeStream(bis);
-					allFlags[i] = flagArray[i];
-
-					bis.close();
-					is.close();
-				}
-				return flagArray;
-			} catch (Exception e) {
-				Log.e(TAG, "error fetching FLAG from server", e);
-			}
-			return null;
 		}
 	}
 
