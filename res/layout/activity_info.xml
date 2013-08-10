@@ -7,7 +7,7 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#44b5df" >
+        android:background="@color/blue_header" >
 
         <ImageButton
             android:id="@+id/button_logo"
