@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,13 +29,18 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 
+/*
+ * TODO
+ * Add loading images (or ideally a progress bar)
+ */
+
 public class MainActivity extends Activity {
 	private static String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit=0";
 	private static final String TAG = "MainActivity";
 	private static final String LOADING = "Currently loading...";
 	private static final String DONE_LOADING = "Show me more stories!";
 
-	int amountToDisplayAtOnce = 6;
+	int amountToDisplayAtOnce = 4;
 
 	String[] allStories;
 	String[] allAuthors;
@@ -59,16 +65,23 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		// Universal image loader
+		displayImageOptions = new DisplayImageOptions.Builder()
+		.showStubImage(R.drawable.ic_launcher)
+		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
+		.showImageOnFail(R.drawable.button_info)
+		
+//		.cacheInMemory(true)
+		.cacheOnDisc(true)
+		
+		.bitmapConfig(Bitmap.Config.RGB_565).build();
+		
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+		
 		imageLoaderConfig = new ImageLoaderConfiguration.Builder(
 				getApplicationContext()).defaultDisplayImageOptions(
-				DisplayImageOptions.createSimple())
+				DisplayImageOptions.createSimple()).defaultDisplayImageOptions(displayImageOptions)
 				.build();
-
-		displayImageOptions = new DisplayImageOptions.Builder()
-				.showStubImage(R.drawable.ic_launcher)
-				.imageScaleType(ImageScaleType.IN_SAMPLE_INT)
-				.showImageOnFail(R.drawable.button_info)
-				.bitmapConfig(Bitmap.Config.RGB_565).build();
 
 		imageLoader = ImageLoader.getInstance();
 		imageLoader.init(imageLoaderConfig);
@@ -123,6 +136,7 @@ public class MainActivity extends Activity {
 		RelativeLayout inflatedView;
 
 		for (int i = 0; i < amountToDisplayAtOnce; i++) {
+					
 			inflatedView = (RelativeLayout) View.inflate(this,
 					R.layout.add_story, null);
 			inflatedView.setId(viewId);
@@ -135,24 +149,26 @@ public class MainActivity extends Activity {
 				lp.addRule(RelativeLayout.BELOW, (viewId - 1));
 				view.setText(Html.fromHtml(allAuthors[i]));
 				view.setTextSize(15);
-				view.setBackgroundColor(Color.WHITE);
 				view.setPadding(10, 0, 10, 0);
 				((TextView) inflatedView.findViewById(R.id.viewAuthorText))
 						.setText(Html.fromHtml(allAuthors[i]));
 			}
 			if (profile) {
-				imageLoader.displayImage(allProfiles[i], ((ImageView) inflatedView.findViewById(R.id.viewProfilePicture)), 
+				ImageLoader.getInstance().displayImage(allProfiles[i],
+						((ImageView) inflatedView
+								.findViewById(R.id.viewProfilePicture)),
 						displayImageOptions);
 			}
 			if (background) {
-				imageLoader.displayImage(allBackgrounds[i], ((ImageView) inflatedView.findViewById(R.id.viewBackgroundPicture)), 
-						displayImageOptions);;
+				ImageLoader.getInstance().displayImage(allBackgrounds[i],
+						((ImageView) inflatedView
+								.findViewById(R.id.viewBackgroundPicture)),
+						displayImageOptions);
 			}
 			if (text) {
 				TextView view = new TextView(this);
 				view.setText(allStories[i]);
 				view.setTextSize(17);
-				view.setBackgroundColor(Color.WHITE);
 				view.setPadding(10, 0, 10, 0);
 				((TextView) inflatedView.findViewById(R.id.viewStoryText))
 						.setText(Html.fromHtml(allStories[i]));

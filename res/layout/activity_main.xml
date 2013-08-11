@@ -81,10 +81,10 @@
                 <Button
                     android:id="@+id/buttonLoadMoreStories"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_horizontal"
-                    android:textSize="17sp"
-                    android:text="@string/button_load_more" />
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:text="@string/button_load_more"
+                    android:textSize="20sp" />
             </LinearLayout>
         </ScrollView>
 
