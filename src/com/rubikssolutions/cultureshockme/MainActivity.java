@@ -1,24 +1,19 @@
 package com.rubikssolutions.cultureshockme;
 
-import java.io.InputStream;
-import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,18 +23,23 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+
 public class MainActivity extends Activity {
 	private static String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit=0";
 	private static final String TAG = "MainActivity";
 	private static final String LOADING = "Currently loading...";
 	private static final String DONE_LOADING = "Show me more stories!";
 
-	int amountToDisplayAtOnce = 4;
+	int amountToDisplayAtOnce = 6;
 
 	String[] allStories;
 	String[] allAuthors;
-	Bitmap[] allBackgrounds;
-	Bitmap[] allProfiles;
+	String[] allBackgrounds;
+	String[] allProfiles;
 	
 	int currentPage = 0;
 
@@ -48,17 +48,36 @@ public class MainActivity extends Activity {
 	boolean loading = true;
 	boolean loadMoreButtonIsEnabled = false;
 	Button loadMoreButton;
+	
+	ImageLoader imageLoader;
+	ImageLoaderConfiguration imageLoaderConfig;
+	DisplayImageOptions displayImageOptions;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		// Universal image loader
+		imageLoaderConfig = new ImageLoaderConfiguration.Builder(
+				getApplicationContext()).defaultDisplayImageOptions(
+				DisplayImageOptions.createSimple())
+				.build();
+
+		displayImageOptions = new DisplayImageOptions.Builder()
+				.showStubImage(R.drawable.ic_launcher)
+				.imageScaleType(ImageScaleType.IN_SAMPLE_INT)
+				.showImageOnFail(R.drawable.button_info)
+				.bitmapConfig(Bitmap.Config.RGB_565).build();
+
+		imageLoader = ImageLoader.getInstance();
+		imageLoader.init(imageLoaderConfig);
+
 		// Create the arrays to hold ALL
 		allStories = new String[amountToDisplayAtOnce];
 		allAuthors = new String[amountToDisplayAtOnce];
-		allBackgrounds = new Bitmap[amountToDisplayAtOnce];
-		allProfiles = new Bitmap[amountToDisplayAtOnce];
+		allBackgrounds = new String[amountToDisplayAtOnce];
+		allProfiles = new String[amountToDisplayAtOnce];
 
 		ImageButton infoButton = (ImageButton) findViewById(R.id.button_info);
 		infoButton.setOnClickListener(new OnClickListener() {
@@ -103,9 +122,6 @@ public class MainActivity extends Activity {
 		RelativeLayout wrapper = (RelativeLayout) findViewById(R.id.mainFeedView);
 		RelativeLayout inflatedView;
 
-		TextView[] textViews = new TextView[amountToDisplayAtOnce];
-		ImageView[] imageViews = new ImageView[amountToDisplayAtOnce];
-
 		for (int i = 0; i < amountToDisplayAtOnce; i++) {
 			inflatedView = (RelativeLayout) View.inflate(this,
 					R.layout.add_story, null);
@@ -121,24 +137,16 @@ public class MainActivity extends Activity {
 				view.setTextSize(15);
 				view.setBackgroundColor(Color.WHITE);
 				view.setPadding(10, 0, 10, 0);
-				textViews[i] = view;
 				((TextView) inflatedView.findViewById(R.id.viewAuthorText))
 						.setText(Html.fromHtml(allAuthors[i]));
 			}
 			if (profile) {
-				ImageView view = new ImageView(this);
-				view.setImageBitmap(allProfiles[i]);
-				imageViews[i] = view;
-				((ImageView) inflatedView.findViewById(R.id.viewProfilePicture))
-						.setImageBitmap(allProfiles[i]);
+				imageLoader.displayImage(allProfiles[i], ((ImageView) inflatedView.findViewById(R.id.viewProfilePicture)), 
+						displayImageOptions);
 			}
 			if (background) {
-				ImageView view = new ImageView(this);
-				view.setImageBitmap(allBackgrounds[i]);
-				imageViews[i] = view;
-				((ImageView) inflatedView
-						.findViewById(R.id.viewBackgroundPicture))
-						.setImageBitmap(allBackgrounds[i]);
+				imageLoader.displayImage(allBackgrounds[i], ((ImageView) inflatedView.findViewById(R.id.viewBackgroundPicture)), 
+						displayImageOptions);;
 			}
 			if (text) {
 				TextView view = new TextView(this);
@@ -146,7 +154,6 @@ public class MainActivity extends Activity {
 				view.setTextSize(17);
 				view.setBackgroundColor(Color.WHITE);
 				view.setPadding(10, 0, 10, 0);
-				textViews[i] = view;
 				((TextView) inflatedView.findViewById(R.id.viewStoryText))
 						.setText(Html.fromHtml(allStories[i]));
 			}
@@ -188,16 +195,12 @@ public class MainActivity extends Activity {
 		timer.schedule(doAsynchronousTask, 0);
 	}
 
-	class BackgroundLoader extends AsyncTask<String, Void, Bitmap[]> {
+	class BackgroundLoader extends AsyncTask<String, Void, String[]> {
 		@Override
-		protected Bitmap[] doInBackground(String... params) {
-			Bitmap[] backgroundArray = new Bitmap[amountToDisplayAtOnce];
-			String[] backgroundURLArray = new String[amountToDisplayAtOnce];
-
+		protected String[] doInBackground(String... params) {
 			try {
-				Document doc = Jsoup.connect(API_URL).get();
-				Elements uRLElements = doc
-						.select("[style^=background-image:url(']");
+				Elements uRLElements = 
+						Jsoup.connect(API_URL).get().select("[style^=background-image:url(']");
 				int backgroundCounter = 0;
 				for (int i = 0; i < (amountToDisplayAtOnce * 2); i++) {
 					try {
@@ -206,7 +209,7 @@ public class MainActivity extends Activity {
 						if (uRlString.startsWith("http")) {
 							uRlString = uRlString.substring(0,
 									uRlString.length() - 10);
-							backgroundURLArray[backgroundCounter] = uRlString;
+							allBackgrounds[backgroundCounter] = uRlString;
 							backgroundCounter++;
 						} else if (uRlString.startsWith("'")) {
 							backgroundCounter++;
@@ -216,67 +219,25 @@ public class MainActivity extends Activity {
 					}
 				}
 			} catch (Exception e) {
-				Log.e(TAG, "error connecting to server", e);
+				Log.e(TAG, "Background - error connecting to server", e);
 			}
-
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inSampleSize = 4;
-
-			// Not excactly sure what all these do, a bit dangerous
-			options.inPurgeable = true;
-			options.inInputShareable = true;
-			// Not excactly sure what all these do, a bit dangerous
-
-			for (int i = 0; i < amountToDisplayAtOnce; i++) {
-				try {
-					Bitmap bitmap = scaleBitmapToDevice(BitmapFactory.decodeStream(
-							(InputStream) new URL(backgroundURLArray[i])
-									.getContent(), null, options));
-					backgroundArray[i] = bitmap;
-					allBackgrounds[i] = backgroundArray[i];
-				} catch (Exception e) {
-					Log.e(TAG, "error fetching BACKGROUND from URL -" + i, e);
-				}
-			}
-			return backgroundArray;
+			return allBackgrounds;
 		}
 	}
 
-	class ProfilePictureLoader extends AsyncTask<String, Void, Bitmap[]> {
+	class ProfilePictureLoader extends AsyncTask<ImageView, Void, String[]> {
 		@Override
-		protected Bitmap[] doInBackground(String... params) {
-			Bitmap[] profiles = new Bitmap[amountToDisplayAtOnce];
-			String[] profileURLs = new String[amountToDisplayAtOnce];
+		protected String[] doInBackground(ImageView... params) {
 			try {
 				Elements pics = Jsoup.connect(API_URL).get().select("img");
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					String url = pics.get(i).absUrl("src");
-					profileURLs[i] = url;
+					allProfiles[i] = url; 
 				}
 			} catch (Exception e) {
-				Log.e(TAG, "error connecting to server", e);
+				Log.e(TAG, "Profile - error connecting to server", e);
 			}
-
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			options.inSampleSize = 8;
-
-			// Not excactly sure what all these do, a bit dangerous
-			options.inPurgeable = true;
-			options.inInputShareable = true;
-			// Not excactly sure what all these do, a bit dangerous
-
-			for (int i = 0; i < amountToDisplayAtOnce; i++) {
-				try {
-					Bitmap bitmap = scaleProfileBitmap(BitmapFactory
-							.decodeStream((InputStream) new URL(profileURLs[i])
-									.getContent(), null, options));
-					profiles[i] = bitmap;
-					allProfiles[i] = profiles[i];
-				} catch (Exception e) {
-					Log.e(TAG, "error fetching BACKGROUND from URL -" + i, e);
-				}
-			}
-			return profiles;
+			return allProfiles;
 		}
 	}
 
@@ -328,31 +289,5 @@ public class MainActivity extends Activity {
 				return null;
 			}
 		}
-	}
-
-	private Bitmap scaleBitmapToDevice(Bitmap inputBitmap) {
-		DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
-		int deviceWidth = dm.widthPixels;
-
-		float width = inputBitmap.getWidth();
-		float height = inputBitmap.getHeight();
-		float ratio = (width / height);
-
-		return Bitmap.createScaledBitmap(inputBitmap, deviceWidth,
-				(int) (deviceWidth / ratio), false);
-	}
-
-	private Bitmap scaleProfileBitmap(Bitmap inputBitmap) {
-		DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
-		int profilePicWidth = (int) (dm.widthPixels / 10f);
-
-		float width = inputBitmap.getWidth();
-		float height = inputBitmap.getHeight();
-		float ratio = (width / height);
-
-		return Bitmap.createScaledBitmap(inputBitmap, profilePicWidth,
-				(int) (profilePicWidth / ratio), false);
 	}
 }
