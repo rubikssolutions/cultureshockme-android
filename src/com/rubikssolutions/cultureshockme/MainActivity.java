@@ -14,7 +14,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,10 +28,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 
-/*
- * TODO
- * Add loading images (or ideally a progress bar)
- */
 
 public class MainActivity extends Activity {
 	private static String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit=0";
@@ -40,7 +35,7 @@ public class MainActivity extends Activity {
 	private static final String LOADING = "Currently loading...";
 	private static final String DONE_LOADING = "Show me more stories!";
 
-	int amountToDisplayAtOnce = 4;
+	int amountToDisplayAtOnce = 3;
 
 	String[] allStories;
 	String[] allAuthors;
@@ -57,7 +52,8 @@ public class MainActivity extends Activity {
 	
 	ImageLoader imageLoader;
 	ImageLoaderConfiguration imageLoaderConfig;
-	DisplayImageOptions displayImageOptions;
+	DisplayImageOptions optionsProfile;
+	DisplayImageOptions optionsBackground;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,22 +61,23 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		// Universal image loader
-		displayImageOptions = new DisplayImageOptions.Builder()
-		.showStubImage(R.drawable.ic_launcher)
+		optionsProfile = new DisplayImageOptions.Builder()
+		.showStubImage(R.drawable.profile_default)
 		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
-		.showImageOnFail(R.drawable.button_info)
-		
-//		.cacheInMemory(true)
+		.showImageOnFail(R.drawable.profile_default)
 		.cacheOnDisc(true)
-		
 		.bitmapConfig(Bitmap.Config.RGB_565).build();
 		
-		DisplayMetrics dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm);
+		optionsBackground = new DisplayImageOptions.Builder()
+		.showStubImage(R.drawable.image_loading)
+		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
+		.cacheOnDisc(true)
+		.bitmapConfig(Bitmap.Config.RGB_565).build();
 		
 		imageLoaderConfig = new ImageLoaderConfiguration.Builder(
 				getApplicationContext()).defaultDisplayImageOptions(
-				DisplayImageOptions.createSimple()).defaultDisplayImageOptions(displayImageOptions)
+				DisplayImageOptions.createSimple())
+				.denyCacheImageMultipleSizesInMemory()
 				.build();
 
 		imageLoader = ImageLoader.getInstance();
@@ -118,20 +115,19 @@ public class MainActivity extends Activity {
 							+ currentPage;
 					Log.i(TAG, currentPage + "== current page");
 					Log.i(TAG, API_URL);
-					loadMoreStories(true, true, true, true);
-					addPage(true, true, true, true);
+					loadMoreStories();
+					addPage();
 				}
 			}
 		});
 
-		loadMoreStories(true, true, true, true);
+		loadMoreStories();
 		currentPage += amountToDisplayAtOnce;
 
 		loading = false;
 	}
 
-	private void addPage(boolean profile, boolean author,
-			boolean background, boolean text) {
+	private void addPage() {
 		RelativeLayout wrapper = (RelativeLayout) findViewById(R.id.mainFeedView);
 		RelativeLayout inflatedView;
 
@@ -144,43 +140,26 @@ public class MainActivity extends Activity {
 					RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
 			lp.setMargins(0, 0, 0, 20);
-			if (author) {
-				TextView view = new TextView(this);
-				lp.addRule(RelativeLayout.BELOW, (viewId - 1));
-				view.setText(Html.fromHtml(allAuthors[i]));
-				view.setTextSize(15);
-				view.setPadding(10, 0, 10, 0);
-				((TextView) inflatedView.findViewById(R.id.viewAuthorText))
-						.setText(Html.fromHtml(allAuthors[i]));
-			}
-			if (profile) {
-				ImageLoader.getInstance().displayImage(allProfiles[i],
-						((ImageView) inflatedView
-								.findViewById(R.id.viewProfilePicture)),
-						displayImageOptions);
-			}
-			if (background) {
-				ImageLoader.getInstance().displayImage(allBackgrounds[i],
-						((ImageView) inflatedView
-								.findViewById(R.id.viewBackgroundPicture)),
-						displayImageOptions);
-			}
-			if (text) {
-				TextView view = new TextView(this);
-				view.setText(allStories[i]);
-				view.setTextSize(17);
-				view.setPadding(10, 0, 10, 0);
-				((TextView) inflatedView.findViewById(R.id.viewStoryText))
-						.setText(Html.fromHtml(allStories[i]));
-			}
+			lp.addRule(RelativeLayout.BELOW, (viewId - 1));
+			((TextView) inflatedView.findViewById(R.id.viewAuthorText))
+					.setText(Html.fromHtml(allAuthors[i]));
+			ImageLoader.getInstance().displayImage(allProfiles[i],
+					((ImageView) inflatedView
+							.findViewById(R.id.viewProfilePicture)),
+					optionsProfile);
+			ImageLoader.getInstance().displayImage(allBackgrounds[i],
+					((ImageView) inflatedView
+							.findViewById(R.id.viewBackgroundPicture)),
+					optionsBackground);
+			((TextView) inflatedView.findViewById(R.id.viewStoryText))
+					.setText(Html.fromHtml(allStories[i]));
 			wrapper.addView(inflatedView, lp);
 			viewId++;
 		}
 		currentPage += amountToDisplayAtOnce;
 	}
 
-	public void loadMoreStories(final boolean profile, final boolean author,
-			final boolean background, final boolean text) {
+	public void loadMoreStories() {
 		final Handler handler = new Handler();
 		Timer timer = new Timer();
 		TimerTask doAsynchronousTask = new TimerTask() {
@@ -189,18 +168,10 @@ public class MainActivity extends Activity {
 				handler.post(new Runnable() {
 					public void run() {
 						try {
-							if (profile) {
-								new ProfilePictureLoader().execute();
-							}
-							if (author) {
-								new AuthorLoader().execute();
-							}
-							if (background) {
-								new BackgroundLoader().execute();
-							}
-							if (text) {
-								new StoryLoader().execute();
-							}
+							new ProfilePictureLoader().execute();
+							new AuthorLoader().execute();
+							new BackgroundLoader().execute();
+							new StoryLoader().execute();
 						} catch (Exception e) {
 							Log.e(TAG, "Could not execute storyloader", e);
 						}
