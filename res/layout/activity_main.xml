@@ -61,6 +61,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:fillViewport="false"
+            android:background="@color/white_story_bk"
             android:scrollY="20dp" >
 
             <LinearLayout

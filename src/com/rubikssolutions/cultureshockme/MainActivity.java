@@ -266,7 +266,7 @@ public class MainActivity extends Activity {
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					authorArray[i] = "<big>" + "<i>"
 							+ authorElements.get(i).text() + "</i>"
-							+ "</big>\n" + "<br />"
+							+ "</big>\n" + "<br />" + "    "
 							+ countryElements.get(i).text();
 					allAuthors[i] = authorArray[i];
 				}

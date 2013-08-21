@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white_story_bk" >
+    android:layout_height="match_parent" >
 
     <ImageView
         android:id="@+id/viewProfilePicture"
@@ -10,15 +9,18 @@
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_marginEnd="3dp"
+        android:layout_marginRight="3dp"
         android:contentDescription="@string/action_settings"
         android:maxHeight="48dp"
         android:maxWidth="48dp"
         android:minHeight="48dp"
         android:minWidth="48dp"
-        android:scaleType="fitCenter"
-        android:layout_marginBottom="3dp" />
+        android:scaleType="fitCenter" />
 
     <TextView
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
         android:id="@+id/viewAuthorText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -29,20 +31,20 @@
         android:maxWidth="48dp"
         android:minHeight="48dp"
         android:minWidth="48dp"
-        android:layout_marginBottom="3dp"
         android:textIsSelectable="false"
         android:textSize="15sp" />
 
     <ImageView
+        android:layout_marginTop="5dp"
         android:id="@+id/viewBackgroundPicture"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:scaleType="fitXY"
         android:layout_alignParentStart="true"
         android:layout_below="@id/viewAuthorText"
         android:adjustViewBounds="true"
-        android:contentDescription="@string/action_settings" />
+        android:contentDescription="@string/action_settings"
+        android:scaleType="fitXY" />
 
     <TextView
         android:id="@+id/viewStoryText"
