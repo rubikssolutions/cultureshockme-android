@@ -41,6 +41,7 @@ public class MainActivity extends Activity {
 	String[] allAuthors;
 	String[] allBackgrounds;
 	String[] allProfiles;
+	String[] allFlags;
 	
 	int currentPage = 0;
 
@@ -53,41 +54,22 @@ public class MainActivity extends Activity {
 	ImageLoader imageLoader;
 	ImageLoaderConfiguration imageLoaderConfig;
 	DisplayImageOptions optionsProfile;
+	DisplayImageOptions optionsFlag;
 	DisplayImageOptions optionsBackground;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
-		// Universal image loader
-		optionsProfile = new DisplayImageOptions.Builder()
-		.showStubImage(R.drawable.profile_default)
-		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
-		.showImageOnFail(R.drawable.profile_default)
-		.cacheOnDisc(true)
-		.bitmapConfig(Bitmap.Config.RGB_565).build();
 		
-		optionsBackground = new DisplayImageOptions.Builder()
-		.showStubImage(R.drawable.image_loading)
-		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
-		.cacheOnDisc(true)
-		.bitmapConfig(Bitmap.Config.RGB_565).build();
-		
-		imageLoaderConfig = new ImageLoaderConfiguration.Builder(
-				getApplicationContext()).defaultDisplayImageOptions(
-				DisplayImageOptions.createSimple())
-				.denyCacheImageMultipleSizesInMemory()
-				.build();
-
-		imageLoader = ImageLoader.getInstance();
-		imageLoader.init(imageLoaderConfig);
+		setupImageLoader();
 
 		// Create the arrays to hold ALL
 		allStories = new String[amountToDisplayAtOnce];
 		allAuthors = new String[amountToDisplayAtOnce];
 		allBackgrounds = new String[amountToDisplayAtOnce];
 		allProfiles = new String[amountToDisplayAtOnce];
+		allFlags = new String[amountToDisplayAtOnce];
 
 		ImageButton infoButton = (ImageButton) findViewById(R.id.button_info);
 		infoButton.setOnClickListener(new OnClickListener() {
@@ -127,6 +109,36 @@ public class MainActivity extends Activity {
 		loading = false;
 	}
 
+	private void setupImageLoader() {
+		// Universal image loader
+		optionsProfile = new DisplayImageOptions.Builder()
+		.showStubImage(R.drawable.profile_default)
+		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
+		.showImageOnFail(R.drawable.profile_default)
+		.cacheOnDisc(true)
+		.bitmapConfig(Bitmap.Config.RGB_565).build();
+		
+		optionsFlag = new DisplayImageOptions.Builder()
+		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
+		.cacheOnDisc(true)
+		.bitmapConfig(Bitmap.Config.RGB_565).build();
+		
+		optionsBackground = new DisplayImageOptions.Builder()
+		.showStubImage(R.drawable.image_loading)
+		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
+		.cacheOnDisc(true)
+		.bitmapConfig(Bitmap.Config.RGB_565).build();
+		
+		imageLoaderConfig = new ImageLoaderConfiguration.Builder(
+				getApplicationContext()).defaultDisplayImageOptions(
+				DisplayImageOptions.createSimple())
+				.denyCacheImageMultipleSizesInMemory()
+				.build();
+
+		imageLoader = ImageLoader.getInstance();
+		imageLoader.init(imageLoaderConfig);
+	}
+
 	private void addPage() {
 		RelativeLayout wrapper = (RelativeLayout) findViewById(R.id.mainFeedView);
 		RelativeLayout inflatedView;
@@ -143,6 +155,10 @@ public class MainActivity extends Activity {
 			lp.addRule(RelativeLayout.BELOW, (viewId - 1));
 			((TextView) inflatedView.findViewById(R.id.viewAuthorText))
 					.setText(Html.fromHtml(allAuthors[i]));
+			ImageLoader.getInstance().displayImage(allFlags[i],
+					((ImageView) inflatedView
+							.findViewById(R.id.viewFlag)),
+					optionsFlag);
 			ImageLoader.getInstance().displayImage(allProfiles[i],
 					((ImageView) inflatedView
 							.findViewById(R.id.viewProfilePicture)),
@@ -168,6 +184,7 @@ public class MainActivity extends Activity {
 				handler.post(new Runnable() {
 					public void run() {
 						try {
+							new FlagLoader().execute();
 							new ProfilePictureLoader().execute();
 							new AuthorLoader().execute();
 							new BackgroundLoader().execute();
@@ -209,6 +226,26 @@ public class MainActivity extends Activity {
 				Log.e(TAG, "Background - error connecting to server", e);
 			}
 			return allBackgrounds;
+		}
+	}
+	
+	class FlagLoader extends AsyncTask<ImageView, Void, String[]> {
+		@Override
+		protected String[] doInBackground(ImageView... params) {
+			try {
+				Elements flags = Jsoup.connect(API_URL).get()
+						.select("[style*=flags/mini]");
+				for (int i = 0; i < amountToDisplayAtOnce; i++) {
+					String imageCode = flags.get(i).toString()
+							.substring(125, 131);
+					String url = "http://culture-shock.me/img/icons/flags/mini/"
+							+ imageCode;
+					allFlags[i] = url;
+				}
+			} catch (Exception e) {
+				Log.e(TAG, "Profile - error connecting to server", e);
+			}
+			return allFlags;
 		}
 	}
 
@@ -266,7 +303,7 @@ public class MainActivity extends Activity {
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					authorArray[i] = "<big>" + "<i>"
 							+ authorElements.get(i).text() + "</i>"
-							+ "</big>\n" + "<br />" + "    "
+							+ "</big>\n" + "<br />"
 							+ countryElements.get(i).text();
 					allAuthors[i] = authorArray[i];
 				}
