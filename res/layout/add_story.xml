@@ -54,7 +54,7 @@
         android:layout_marginRight="1dp"
         android:layout_toEndOf="@id/viewProfilePicture"
         android:layout_toRightOf="@id/viewProfilePicture"
-        android:onClick="locationOnMap"
+        android:textIsSelectable="false"
         android:textSize="15sp" />
 
     <TextView
@@ -68,9 +68,10 @@
         android:layout_toEndOf="@id/viewLocationPin"
         android:layout_toRightOf="@id/viewLocationPin"
         android:gravity="bottom|start"
-        android:onClick="locationOnMap"
+        android:onClick="location"
+        android:clickable="true"
         android:textSize="15sp" />
-
+    
     <ImageView
         android:id="@+id/viewBackgroundPicture"
         android:layout_width="match_parent"

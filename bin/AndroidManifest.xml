@@ -8,8 +8,16 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="18" />
 
+    <!-- Requires openGL2.0, which causes the app not to function on some older devices! -->
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+    <!-- Requires openGL2.0, which causes the app not to function on some older devices! -->
+
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <application
         android:allowBackup="true"
@@ -35,6 +43,10 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Light.NoTitleBar" >
         </activity>
+
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyBXvAwhGW2aB5hbQ_bTEHpG2X9AhS111Gk" />
     </application>
 
 </manifest>

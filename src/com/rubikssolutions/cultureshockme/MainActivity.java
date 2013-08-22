@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,7 +31,7 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 
 
 public class MainActivity extends Activity {
-	private static String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit=0";
+	private static String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more";
 	private static final String TAG = "MainActivity";
 	private static final String LOADING = "Currently loading...";
 	private static final String DONE_LOADING = "Show me more stories!";
@@ -111,8 +112,12 @@ public class MainActivity extends Activity {
 		loading = false;
 	}
 	
-	public void locationOnMap(View view) {
-		// TODO - open the thingie on the map!
+	public void location(View view) {
+		String location = ((TextView) view).getText().toString();
+		Intent intent = new Intent(
+				android.content.Intent.ACTION_VIEW,
+				Uri.parse("http://maps.google.com/?q=" + location));
+		startActivity(intent);
 	}
 
 	private void setupImageLoader() {
@@ -126,7 +131,6 @@ public class MainActivity extends Activity {
 		
 		optionsFlag = new DisplayImageOptions.Builder()
 		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
-		.cacheOnDisc(true)
 		.bitmapConfig(Bitmap.Config.RGB_565).build();
 		
 		optionsBackground = new DisplayImageOptions.Builder()
