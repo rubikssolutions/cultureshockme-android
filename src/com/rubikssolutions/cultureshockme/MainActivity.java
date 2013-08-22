@@ -39,6 +39,7 @@ public class MainActivity extends Activity {
 
 	String[] allStories;
 	String[] allAuthors;
+	String[] allLocations;
 	String[] allBackgrounds;
 	String[] allProfiles;
 	String[] allFlags;
@@ -67,6 +68,7 @@ public class MainActivity extends Activity {
 		// Create the arrays to hold ALL
 		allStories = new String[amountToDisplayAtOnce];
 		allAuthors = new String[amountToDisplayAtOnce];
+		allLocations = new String[amountToDisplayAtOnce];
 		allBackgrounds = new String[amountToDisplayAtOnce];
 		allProfiles = new String[amountToDisplayAtOnce];
 		allFlags = new String[amountToDisplayAtOnce];
@@ -107,6 +109,10 @@ public class MainActivity extends Activity {
 		currentPage += amountToDisplayAtOnce;
 
 		loading = false;
+	}
+	
+	public void locationOnMap(View view) {
+		// TODO - open the thingie on the map!
 	}
 
 	private void setupImageLoader() {
@@ -155,6 +161,8 @@ public class MainActivity extends Activity {
 			lp.addRule(RelativeLayout.BELOW, (viewId - 1));
 			((TextView) inflatedView.findViewById(R.id.viewAuthorText))
 					.setText(Html.fromHtml(allAuthors[i]));
+			((TextView) inflatedView.findViewById(R.id.viewLocationText))
+			.setText(Html.fromHtml(allLocations[i]));
 			ImageLoader.getInstance().displayImage(allFlags[i],
 					((ImageView) inflatedView
 							.findViewById(R.id.viewFlag)),
@@ -226,7 +234,7 @@ public class MainActivity extends Activity {
 				Log.e(TAG, "Background - error connecting to server", e);
 			}
 			return allBackgrounds;
-		}
+		}	
 	}
 	
 	class FlagLoader extends AsyncTask<ImageView, Void, String[]> {
@@ -293,7 +301,6 @@ public class MainActivity extends Activity {
 	class AuthorLoader extends AsyncTask<String, Void, String[]> {
 		protected String[] doInBackground(String... urls) {
 			try {
-				String[] authorArray = new String[amountToDisplayAtOnce];
 				Elements authorElements = Jsoup.connect(API_URL).get()
 						.select("[class=user_link]");
 				Elements countryElements = Jsoup
@@ -301,13 +308,12 @@ public class MainActivity extends Activity {
 						.get()
 						.select("[class=browse_story_location with_countryflag_icon]");
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
-					authorArray[i] = "<big>" + "<i>"
+					allAuthors[i] = "<big>" + "<i>"
 							+ authorElements.get(i).text() + "</i>"
-							+ "</big>\n" + "<br />"
-							+ countryElements.get(i).text();
-					allAuthors[i] = authorArray[i];
+							+ "</big>" + "<br />";
+					allLocations[i] = countryElements.get(i).text();
 				}
-				return authorArray;
+				return null;
 			} catch (Exception e) {
 				Log.e(TAG, "error fetching AUTHOR from server", e);
 				return null;

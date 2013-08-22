@@ -20,18 +20,14 @@
 
     <ImageView
         android:id="@+id/viewProfilePicture"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@id/viewFlag"
         android:layout_marginEnd="3dp"
         android:layout_marginRight="3dp"
         android:contentDescription="@string/action_settings"
-        android:maxHeight="64dp"
-        android:maxWidth="48dp"
-        android:minHeight="48dp"
-        android:minWidth="48dp"
         android:scaleType="fitCenter" />
 
     <ImageView
@@ -39,9 +35,9 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:layout_alignBottom="@id/viewProfilePicture"
+        android:layout_marginBottom="3dp"
         android:layout_marginEnd="1dp"
         android:layout_marginRight="1dp"
-        android:layout_marginBottom="3dp"
         android:layout_toEndOf="@id/viewProfilePicture"
         android:layout_toRightOf="@id/viewProfilePicture"
         android:adjustViewBounds="true"
@@ -53,14 +49,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/viewProfilePicture"
+        android:layout_marginBottom="14dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginRight="1dp"
+        android:layout_toEndOf="@id/viewProfilePicture"
+        android:layout_toRightOf="@id/viewProfilePicture"
+        android:onClick="locationOnMap"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/viewLocationText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/viewProfilePicture"
+        android:layout_marginBottom="1dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginRight="1dp"
         android:layout_toEndOf="@id/viewLocationPin"
         android:layout_toRightOf="@id/viewLocationPin"
         android:gravity="bottom|start"
-        android:maxHeight="64dp"
-        android:maxWidth="48dp"
-        android:minHeight="48dp"
-        android:minWidth="48dp"
-        android:textIsSelectable="false"
+        android:onClick="locationOnMap"
         android:textSize="15sp" />
 
     <ImageView
