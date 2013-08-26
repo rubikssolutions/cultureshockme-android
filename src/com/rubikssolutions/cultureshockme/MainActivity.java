@@ -9,7 +9,6 @@ import org.jsoup.select.Elements;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,6 +20,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -33,36 +33,37 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 public class MainActivity extends Activity {
 	private static String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more";
 	private static final String TAG = "MainActivity";
-	private static final String LOADING = "Currently loading...";
-	private static final String DONE_LOADING = "Show me more stories!";
 
-	int amountToDisplayAtOnce = 3;
+	int amountToDisplayAtOnce = 2;
 
-	String[] allStories;
-	String[] allAuthors;
-	String[] allLocations;
-	String[] allBackgrounds;
-	String[] allProfiles;
-	String[] allFlags;
+	public static String[] allStories;
+	public static String[] allAuthors;
+	public static String[] allLocations;
+	public static String[] allBackgrounds;
+	public static String[] allProfiles;
+	public static String[] allFlags;
 	
 	int currentPage = 0;
 
 	int viewId = 1;
 
-	boolean loading = true;
 	boolean loadMoreButtonIsEnabled = false;
-	Button loadMoreButton;
+	static Button loadMoreButton;
 	
-	ImageLoader imageLoader;
-	ImageLoaderConfiguration imageLoaderConfig;
-	DisplayImageOptions optionsProfile;
-	DisplayImageOptions optionsFlag;
-	DisplayImageOptions optionsBackground;
+	public ImageLoader imageLoader;
+	public ImageLoaderConfiguration imageLoaderConfig;
+	public DisplayImageOptions optionsProfile;
+	public static DisplayImageOptions optionsFlag;
+	public DisplayImageOptions optionsBackground;
+
+	private ProgressBar bar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);		
 		setContentView(R.layout.activity_main);
+		
+		bar = (ProgressBar) this.findViewById(R.id.progressBar);
 		
 		setupImageLoader();
 
@@ -86,30 +87,28 @@ public class MainActivity extends Activity {
 
 		// Configure the button
 		loadMoreButton = (Button) findViewById(R.id.buttonLoadMoreStories);
-		loadMoreButton.setText(LOADING);
-		loadMoreButton.setBackgroundColor(Color.LTGRAY);
 		loadMoreButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				if (loadMoreButtonIsEnabled) {
-					loadMoreButtonIsEnabled = false;
-					loadMoreButton.setText(LOADING);
-					loadMoreButton.setBackgroundColor(Color.LTGRAY);
-					API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit="
-							+ currentPage;
-					Log.i(TAG, currentPage + "== current page");
-					Log.i(TAG, API_URL);
-					loadMoreStories();
-					addPage();
-				}
+				buttonClickedToLoadMore();
 			}
 		});
 
-		loadMoreStories();
+		getNewStoriesFromServer();
 		currentPage += amountToDisplayAtOnce;
-
-		loading = false;
+	}
+	
+	public void buttonClickedToLoadMore() {
+		if (loadMoreButtonIsEnabled) {
+			loadMoreButtonIsEnabled = false;
+			API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit="
+					+ currentPage;
+			Log.i(TAG, currentPage + "== current page");
+			Log.i(TAG, API_URL);
+			getNewStoriesFromServer();
+			addPage();
+		}
 	}
 	
 	public void location(View view) {
@@ -187,7 +186,7 @@ public class MainActivity extends Activity {
 		currentPage += amountToDisplayAtOnce;
 	}
 
-	public void loadMoreStories() {
+	public void getNewStoriesFromServer() {
 		final Handler handler = new Handler();
 		Timer timer = new Timer();
 		TimerTask doAsynchronousTask = new TimerTask() {
@@ -196,11 +195,12 @@ public class MainActivity extends Activity {
 				handler.post(new Runnable() {
 					public void run() {
 						try {
+							bar.setVisibility(View.VISIBLE);
 							new FlagLoader().execute();
 							new ProfilePictureLoader().execute();
 							new AuthorLoader().execute();
-							new BackgroundLoader().execute();
 							new StoryLoader().execute();
+							new BackgroundLoader().execute();
 						} catch (Exception e) {
 							Log.e(TAG, "Could not execute storyloader", e);
 						}
@@ -212,6 +212,7 @@ public class MainActivity extends Activity {
 	}
 
 	class BackgroundLoader extends AsyncTask<String, Void, String[]> {
+		
 		@Override
 		protected String[] doInBackground(String... params) {
 			try {
@@ -239,6 +240,19 @@ public class MainActivity extends Activity {
 			}
 			return allBackgrounds;
 		}	
+		
+		@Override
+		protected void onPostExecute(String[] result) {
+			loadMoreButtonIsEnabled = true;
+			if (currentPage == amountToDisplayAtOnce) {
+				API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit="
+						+ currentPage;
+				addPage();
+				getNewStoriesFromServer();
+			}
+			Log.i("PageTag", "pageTag" + currentPage);
+			bar.setVisibility(View.INVISIBLE);
+		}
 	}
 	
 	class FlagLoader extends AsyncTask<ImageView, Void, String[]> {
@@ -285,6 +299,7 @@ public class MainActivity extends Activity {
 						.select("H3");
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					textArray[i] = textElements.get(i).text();
+					Log.d("StoryDebug", "StoryDebug textelement: " + textElements.get(i).text());
 					allStories[i] = textArray[i];
 				}
 				return textArray;
@@ -292,13 +307,6 @@ public class MainActivity extends Activity {
 				Log.e(TAG, "error fetching TEXT from server", e);
 				return null;
 			}
-		}
-
-		@Override
-		protected void onPostExecute(String[] result) {
-			loadMoreButtonIsEnabled = true;
-			loadMoreButton.setText(DONE_LOADING);
-			loadMoreButton.setBackgroundColor(Color.YELLOW);
 		}
 	}
 

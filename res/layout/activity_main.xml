@@ -57,11 +57,11 @@
         <!-- End of header -->
         <!-- Start of main feed -->
 
-        <ScrollView
+        <com.rubikssolutions.cultureshockme.MyScrollView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:fillViewport="false"
             android:background="@color/white_story_bk"
+            android:fillViewport="false"
             android:scrollY="20dp" >
 
             <LinearLayout
@@ -82,12 +82,26 @@
                 <Button
                     android:id="@+id/buttonLoadMoreStories"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:gravity="center"
-                    android:text="@string/button_load_more"
-                    android:textSize="20sp" />
+                    android:layout_height="0dp"
+                    android:gravity="center" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:indeterminateDrawable="@drawable/progress"
+                    android:visibility="gone" >
+                </ProgressBar>
             </LinearLayout>
-        </ScrollView>
+        </com.rubikssolutions.cultureshockme.MyScrollView>
+
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
+        </ListView>
 
         <!-- End of main feed -->
 
