@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -47,7 +48,7 @@ public class MainActivity extends Activity {
 
 	int viewId = 1;
 
-	boolean loadMoreButtonIsEnabled = false;
+	boolean loading = true;
 	static Button loadMoreButton;
 	
 	public ImageLoader imageLoader;
@@ -63,7 +64,13 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);		
 		setContentView(R.layout.activity_main);
 		
+		// Setup the spinning progressbar
 		bar = (ProgressBar) this.findViewById(R.id.progressBar);
+		
+		// Calculate position to center it
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+		bar.setPadding(0, (int) (dm.heightPixels/2f) - (int) (dm.heightPixels/8f), 0, 0);
 		
 		setupImageLoader();
 
@@ -100,8 +107,8 @@ public class MainActivity extends Activity {
 	}
 	
 	public void buttonClickedToLoadMore() {
-		if (loadMoreButtonIsEnabled) {
-			loadMoreButtonIsEnabled = false;
+		if (loading == false) {
+			loading = true;
 			API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit="
 					+ currentPage;
 			Log.i(TAG, currentPage + "== current page");
@@ -195,6 +202,7 @@ public class MainActivity extends Activity {
 				handler.post(new Runnable() {
 					public void run() {
 						try {
+							loading = true;
 							bar.setVisibility(View.VISIBLE);
 							new FlagLoader().execute();
 							new ProfilePictureLoader().execute();
@@ -243,7 +251,7 @@ public class MainActivity extends Activity {
 		
 		@Override
 		protected void onPostExecute(String[] result) {
-			loadMoreButtonIsEnabled = true;
+			loading = false;
 			if (currentPage == amountToDisplayAtOnce) {
 				API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit="
 						+ currentPage;
@@ -251,6 +259,7 @@ public class MainActivity extends Activity {
 				getNewStoriesFromServer();
 			}
 			Log.i("PageTag", "pageTag" + currentPage);
+			bar.setPadding(0, 0, 0, 0);
 			bar.setVisibility(View.INVISIBLE);
 		}
 	}

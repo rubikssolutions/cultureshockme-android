@@ -116,8 +116,8 @@
                 android:adjustViewBounds="true"
                 android:paddingTop="35dp"
                 android:paddingBottom="10dp"
-                android:paddingLeft="13dp"
-                android:paddingRight="13dp"
+                android:paddingLeft="45dp"
+                android:paddingRight="45dp"
                 android:paddingStart="13dp"
                 android:paddingEnd="13dp"
                 android:src="@drawable/logo_rubiks_wide" />
