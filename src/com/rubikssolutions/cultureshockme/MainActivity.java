@@ -71,6 +71,7 @@ public class MainActivity extends Activity {
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
 		bar.setPadding(0, (int) (dm.heightPixels/2f) - (int) (dm.heightPixels/8f), 0, 0);
+		Log.d("windowsize", "windowsize : " + ((dm.heightPixels/2f) - (dm.heightPixels/8f)));
 		
 		setupImageLoader();
 

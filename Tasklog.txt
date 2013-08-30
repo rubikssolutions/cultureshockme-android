@@ -1,0 +1,13 @@
+Tasklog.txt
+
+1)On my bad phone it still crashed (used my gf's phone to test).
+2)The small flags between stories should be a bit bigger.
+3)There is a design problem with the profile pictures and the text after them. I think the app should automatically make all of the profile pictures square (the website does it also) - otherwise it is too chaotic.
+4)The location should only take one line for itself, not more. I looked up how Instagram has solved the problem and if the location is too long, it just replaces some of the text in the middle with three dots, for example: "Vegetarian restaur...Jakarta, Indonesia".
+5)You could also try to make the font of the location just a little smaller to fit more info but the "..." system should also be implemented (or maybe you have some better ideas?).
+6)At the moment there is a empty line (gap) between the username and the location. There shouldn't be.
+
+1) Bigger flags
+2) Squared profile pictures
+3) Locationtext - smaller font or shorten it.
+4) Remove gap between picture and location (obv)
