@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 
-public class InfoScreen extends Activity {
+public class InfoActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -18,8 +18,8 @@ public class InfoScreen extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				Intent mainScreeIntent = new Intent(InfoScreen.this, MainActivity.class);
-				InfoScreen.this.startActivity(mainScreeIntent);
+				Intent mainScreeIntent = new Intent(InfoActivity.this, MainActivity.class);
+				InfoActivity.this.startActivity(mainScreeIntent);
 			}
 		});
 	}

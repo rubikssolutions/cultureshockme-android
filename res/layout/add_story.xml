@@ -10,10 +10,8 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:contentDescription="@string/action_settings"
-        android:maxHeight="12dp"
-        android:maxWidth="12dp"
-        android:minHeight="12dp"
-        android:minWidth="12dp"
+        android:maxHeight="24dp"
+        android:maxWidth="24dp"
         android:paddingBottom="5dp"
         android:paddingTop="5dp"
         android:scaleType="fitCenter" />
@@ -68,7 +66,7 @@
         android:layout_toEndOf="@id/viewLocationPin"
         android:layout_toRightOf="@id/viewLocationPin"
         android:gravity="bottom|start"
-        android:onClick="location"
+        android:onClick="goToLocation"
         android:clickable="true"
         android:textSize="15sp" />
     

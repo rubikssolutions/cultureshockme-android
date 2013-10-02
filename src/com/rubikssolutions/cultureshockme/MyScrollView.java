@@ -8,7 +8,7 @@ import android.widget.ScrollView;
 
 public class MyScrollView extends ScrollView {
 
-	private static final String LOG_TAG = "scrollView";
+	private static final String TAG = "MyScrollView";
 
     public MyScrollView(Context context) {
         super(context);
@@ -25,9 +25,9 @@ public class MyScrollView extends ScrollView {
 	@Override
 	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
 	        View view = (View) getChildAt(getChildCount()-1);
-	        int diff = (view.getBottom()-(getHeight()+getScrollY()));// Calculate the scrolldiff
-	        if( diff <= 200){  // if diff is zero, then the bottom has been reached
-	            Log.d(MyScrollView.LOG_TAG, "MyScrollView: Bottom has been reached" );
+	        int diff = (view.getBottom() - (getHeight() + getScrollY()));// Calculate the scrolldiff
+	        if( diff <= 10){  // if diff is zero, then the bottom has been reached
+	            Log.d(TAG, "Scrollview bottom has been reached" );
 	            MainActivity.loadMoreButton.performClick();
 	        }
 	        super.onScrollChanged(l, t, oldl, oldt);

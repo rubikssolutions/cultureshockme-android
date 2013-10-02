@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import android.app.Activity;
@@ -30,27 +31,33 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 
-
 public class MainActivity extends Activity {
 	private static String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more";
 	private static final String TAG = "MainActivity";
 
 	int amountToDisplayAtOnce = 2;
 
-	public static String[] allStories;
-	public static String[] allAuthors;
-	public static String[] allLocations;
-	public static String[] allBackgrounds;
-	public static String[] allProfiles;
-	public static String[] allFlags;
-	
+	private static String[] allStories;
+	private static String[] allAuthors;
+	private static String[] allLocations;
+	private static String[] allBackgrounds;
+	private static String[] allProfiles;
+	private static String[] allFlags;
+
+	private Elements backgroundElements;
+	private Elements flageElements;
+	private Elements pictureElements;
+	private Elements textElements;
+	private Elements authorElements;
+	private Elements countryElements;
+
 	int currentPage = 0;
 
 	int viewId = 1;
 
 	boolean loading = true;
 	static Button loadMoreButton;
-	
+
 	public ImageLoader imageLoader;
 	public ImageLoaderConfiguration imageLoaderConfig;
 	public DisplayImageOptions optionsProfile;
@@ -61,18 +68,20 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);		
+		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		// Setup the spinning progressbar
 		bar = (ProgressBar) this.findViewById(R.id.progressBar);
-		
+
 		// Calculate position to center it
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
-		bar.setPadding(0, (int) (dm.heightPixels/2f) - (int) (dm.heightPixels/8f), 0, 0);
-		Log.d("windowsize", "windowsize : " + ((dm.heightPixels/2f) - (dm.heightPixels/8f)));
-		
+		bar.setPadding(0, (int) (dm.heightPixels / 2f)
+				- (int) (dm.heightPixels / 8f), 0, 0);
+		Log.d("windowsize", "windowsize : "
+				+ ((dm.heightPixels / 2f) - (dm.heightPixels / 8f)));
+
 		setupImageLoader();
 
 		// Create the arrays to hold ALL
@@ -88,7 +97,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				Intent infoScreenIntent = new Intent(MainActivity.this,
-						InfoScreen.class);
+						InfoActivity.class);
 				MainActivity.this.startActivity(infoScreenIntent);
 			}
 		});
@@ -106,8 +115,8 @@ public class MainActivity extends Activity {
 		getNewStoriesFromServer();
 		currentPage += amountToDisplayAtOnce;
 	}
-	
-	public void buttonClickedToLoadMore() {
+
+	private void buttonClickedToLoadMore() {
 		if (loading == false) {
 			loading = true;
 			API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit="
@@ -118,11 +127,10 @@ public class MainActivity extends Activity {
 			addPage();
 		}
 	}
-	
-	public void location(View view) {
+
+	public void goToLocation(View view) {
 		String location = ((TextView) view).getText().toString();
-		Intent intent = new Intent(
-				android.content.Intent.ACTION_VIEW,
+		Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
 				Uri.parse("http://maps.google.com/?q=" + location));
 		startActivity(intent);
 	}
@@ -130,27 +138,24 @@ public class MainActivity extends Activity {
 	private void setupImageLoader() {
 		// Universal image loader
 		optionsProfile = new DisplayImageOptions.Builder()
-		.showStubImage(R.drawable.profile_default)
-		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
-		.showImageOnFail(R.drawable.profile_default)
-		.cacheOnDisc(true)
-		.bitmapConfig(Bitmap.Config.RGB_565).build();
-		
+				.showStubImage(R.drawable.profile_default)
+				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
+				.showImageOnFail(R.drawable.profile_default).cacheOnDisc(true)
+				.bitmapConfig(Bitmap.Config.RGB_565).build();
+
 		optionsFlag = new DisplayImageOptions.Builder()
-		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
-		.bitmapConfig(Bitmap.Config.RGB_565).build();
-		
+				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
+				.bitmapConfig(Bitmap.Config.RGB_565).build();
+
 		optionsBackground = new DisplayImageOptions.Builder()
-		.showStubImage(R.drawable.image_loading)
-		.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
-		.cacheOnDisc(true)
-		.bitmapConfig(Bitmap.Config.RGB_565).build();
-		
+				.showStubImage(R.drawable.image_loading)
+				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
+				.cacheOnDisc(true).bitmapConfig(Bitmap.Config.RGB_565).build();
+
 		imageLoaderConfig = new ImageLoaderConfiguration.Builder(
-				getApplicationContext()).defaultDisplayImageOptions(
-				DisplayImageOptions.createSimple())
-				.denyCacheImageMultipleSizesInMemory()
-				.build();
+				getApplicationContext())
+				.defaultDisplayImageOptions(DisplayImageOptions.createSimple())
+				.denyCacheImageMultipleSizesInMemory().build();
 
 		imageLoader = ImageLoader.getInstance();
 		imageLoader.init(imageLoaderConfig);
@@ -161,7 +166,7 @@ public class MainActivity extends Activity {
 		RelativeLayout inflatedView;
 
 		for (int i = 0; i < amountToDisplayAtOnce; i++) {
-					
+
 			inflatedView = (RelativeLayout) View.inflate(this,
 					R.layout.add_story, null);
 			inflatedView.setId(viewId);
@@ -173,16 +178,18 @@ public class MainActivity extends Activity {
 			((TextView) inflatedView.findViewById(R.id.viewAuthorText))
 					.setText(Html.fromHtml(allAuthors[i]));
 			((TextView) inflatedView.findViewById(R.id.viewLocationText))
-			.setText(Html.fromHtml(allLocations[i]));
-			ImageLoader.getInstance().displayImage(allFlags[i],
-					((ImageView) inflatedView
-							.findViewById(R.id.viewFlag)),
+					.setText(Html.fromHtml(allLocations[i]));
+			ImageLoader.getInstance().displayImage(
+					"assets://flags/" + allFlags[i],
+					((ImageView) inflatedView.findViewById(R.id.viewFlag)),
 					optionsFlag);
-			ImageLoader.getInstance().displayImage(allProfiles[i],
+			ImageLoader.getInstance().displayImage(
+					allProfiles[i],
 					((ImageView) inflatedView
 							.findViewById(R.id.viewProfilePicture)),
 					optionsProfile);
-			ImageLoader.getInstance().displayImage(allBackgrounds[i],
+			ImageLoader.getInstance().displayImage(
+					allBackgrounds[i],
 					((ImageView) inflatedView
 							.findViewById(R.id.viewBackgroundPicture)),
 					optionsBackground);
@@ -205,6 +212,7 @@ public class MainActivity extends Activity {
 						try {
 							loading = true;
 							bar.setVisibility(View.VISIBLE);
+							new JsoupLoader().execute();
 							new FlagLoader().execute();
 							new ProfilePictureLoader().execute();
 							new AuthorLoader().execute();
@@ -220,17 +228,36 @@ public class MainActivity extends Activity {
 		timer.schedule(doAsynchronousTask, 0);
 	}
 
-	class BackgroundLoader extends AsyncTask<String, Void, String[]> {
-		
+	class JsoupLoader extends AsyncTask<String, Void, String[]> {
+
 		@Override
 		protected String[] doInBackground(String... params) {
 			try {
-				Elements uRLElements = 
-						Jsoup.connect(API_URL).get().select("[style^=background-image:url(']");
+				Document jsoupDocument = Jsoup.connect(API_URL).get();
+				backgroundElements = jsoupDocument
+						.select("[style^=background-image:url(']");
+				authorElements = jsoupDocument.select("[class=user_link]");
+				countryElements = jsoupDocument
+						.select("[class=browse_story_location with_countryflag_icon]");
+				flageElements = jsoupDocument.select("[style*=flags/mini]");
+				textElements = jsoupDocument.select("H3");
+				pictureElements = jsoupDocument.select("img");
+			} catch (Exception e) {
+				Log.e(TAG, "Failed to get jsoupDocument", e);
+			}
+			return null;
+		}
+	}
+
+	class BackgroundLoader extends AsyncTask<String, Void, String[]> {
+
+		@Override
+		protected String[] doInBackground(String... params) {
+			try {
 				int backgroundCounter = 0;
 				for (int i = 0; i < (amountToDisplayAtOnce * 2); i++) {
 					try {
-						String uRlString = uRLElements.get(i).toString();
+						String uRlString = backgroundElements.get(i).toString();
 						uRlString = uRlString.substring(73);
 						if (uRlString.startsWith("http")) {
 							uRlString = uRlString.substring(0,
@@ -248,8 +275,8 @@ public class MainActivity extends Activity {
 				Log.e(TAG, "Background - error connecting to server", e);
 			}
 			return allBackgrounds;
-		}	
-		
+		}
+
 		@Override
 		protected void onPostExecute(String[] result) {
 			loading = false;
@@ -259,24 +286,22 @@ public class MainActivity extends Activity {
 				addPage();
 				getNewStoriesFromServer();
 			}
-			Log.i("PageTag", "pageTag" + currentPage);
+			Log.i(TAG, "Current page: " + currentPage);
 			bar.setPadding(0, 0, 0, 0);
 			bar.setVisibility(View.INVISIBLE);
 		}
 	}
-	
+
 	class FlagLoader extends AsyncTask<ImageView, Void, String[]> {
 		@Override
 		protected String[] doInBackground(ImageView... params) {
 			try {
-				Elements flags = Jsoup.connect(API_URL).get()
-						.select("[style*=flags/mini]");
+
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
-					String imageCode = flags.get(i).toString()
+					String imageCode = flageElements.get(i).toString()
 							.substring(125, 131);
-					String url = "http://culture-shock.me/img/icons/flags/mini/"
-							+ imageCode;
-					allFlags[i] = url;
+					Log.d(TAG, "Flag code: " + imageCode);
+					allFlags[i] = imageCode;
 				}
 			} catch (Exception e) {
 				Log.e(TAG, "Profile - error connecting to server", e);
@@ -289,10 +314,10 @@ public class MainActivity extends Activity {
 		@Override
 		protected String[] doInBackground(ImageView... params) {
 			try {
-				Elements pics = Jsoup.connect(API_URL).get().select("img");
+
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
-					String url = pics.get(i).absUrl("src");
-					allProfiles[i] = url; 
+					String url = pictureElements.get(i).absUrl("src");
+					allProfiles[i] = url;
 				}
 			} catch (Exception e) {
 				Log.e(TAG, "Profile - error connecting to server", e);
@@ -305,11 +330,9 @@ public class MainActivity extends Activity {
 		protected String[] doInBackground(String... urls) {
 			try {
 				String[] textArray = new String[amountToDisplayAtOnce];
-				Elements textElements = Jsoup.connect(API_URL).get()
-						.select("H3");
+
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					textArray[i] = textElements.get(i).text();
-					Log.d("StoryDebug", "StoryDebug textelement: " + textElements.get(i).text());
 					allStories[i] = textArray[i];
 				}
 				return textArray;
@@ -323,16 +346,10 @@ public class MainActivity extends Activity {
 	class AuthorLoader extends AsyncTask<String, Void, String[]> {
 		protected String[] doInBackground(String... urls) {
 			try {
-				Elements authorElements = Jsoup.connect(API_URL).get()
-						.select("[class=user_link]");
-				Elements countryElements = Jsoup
-						.connect(API_URL)
-						.get()
-						.select("[class=browse_story_location with_countryflag_icon]");
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					allAuthors[i] = "<big>" + "<i>"
-							+ authorElements.get(i).text() + "</i>"
-							+ "</big>" + "<br />";
+							+ authorElements.get(i).text() + "</i>" + "</big>"
+							+ "<br />";
 					allLocations[i] = countryElements.get(i).text();
 				}
 				return null;
