@@ -180,7 +180,7 @@ public class MainActivity extends Activity {
 			((TextView) inflatedView.findViewById(R.id.viewLocationText))
 					.setText(Html.fromHtml(allLocations[i]));
 			ImageLoader.getInstance().displayImage(
-					"assets://flags/" + allFlags[i],
+					"assets://flags/" + allFlags[i] + ".png",
 					((ImageView) inflatedView.findViewById(R.id.viewFlag)),
 					optionsFlag);
 			ImageLoader.getInstance().displayImage(
@@ -212,7 +212,7 @@ public class MainActivity extends Activity {
 						try {
 							loading = true;
 							bar.setVisibility(View.VISIBLE);
-							new JsoupLoader().execute();
+							new JsoupLoader().execute().get();
 							new FlagLoader().execute();
 							new ProfilePictureLoader().execute();
 							new AuthorLoader().execute();
@@ -276,6 +276,11 @@ public class MainActivity extends Activity {
 			}
 			return allBackgrounds;
 		}
+		
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+		}
 
 		@Override
 		protected void onPostExecute(String[] result) {
@@ -299,7 +304,7 @@ public class MainActivity extends Activity {
 
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					String imageCode = flageElements.get(i).toString()
-							.substring(125, 131);
+							.substring(125, 127);
 					Log.d(TAG, "Flag code: " + imageCode);
 					allFlags[i] = imageCode;
 				}
