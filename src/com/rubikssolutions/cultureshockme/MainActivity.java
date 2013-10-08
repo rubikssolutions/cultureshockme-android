@@ -58,18 +58,23 @@ public class MainActivity extends Activity {
 	boolean loading = true;
 	static Button loadMoreButton;
 
-	public ImageLoader imageLoader;
+	public ImageLoader loader;
 	public ImageLoaderConfiguration imageLoaderConfig;
 	public DisplayImageOptions optionsProfile;
 	public static DisplayImageOptions optionsFlag;
 	public DisplayImageOptions optionsBackground;
 
 	private ProgressBar bar;
+	
+	private RelativeLayout wrapper;
+	private RelativeLayout inflatedView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		wrapper = (RelativeLayout) findViewById(R.id.mainFeedView);
 
 		// Setup the spinning progressbar
 		bar = (ProgressBar) this.findViewById(R.id.progressBar);
@@ -92,6 +97,7 @@ public class MainActivity extends Activity {
 		allProfiles = new String[amountToDisplayAtOnce];
 		allFlags = new String[amountToDisplayAtOnce];
 
+		// Configure the buttons
 		ImageButton infoButton = (ImageButton) findViewById(R.id.button_info);
 		infoButton.setOnClickListener(new OnClickListener() {
 			@Override
@@ -102,7 +108,6 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		// Configure the button
 		loadMoreButton = (Button) findViewById(R.id.buttonLoadMoreStories);
 		loadMoreButton.setOnClickListener(new OnClickListener() {
 
@@ -157,16 +162,12 @@ public class MainActivity extends Activity {
 				.defaultDisplayImageOptions(DisplayImageOptions.createSimple())
 				.denyCacheImageMultipleSizesInMemory().build();
 
-		imageLoader = ImageLoader.getInstance();
-		imageLoader.init(imageLoaderConfig);
+		loader = ImageLoader.getInstance();
+		loader.init(imageLoaderConfig);
 	}
 
 	private void addPage() {
-		RelativeLayout wrapper = (RelativeLayout) findViewById(R.id.mainFeedView);
-		RelativeLayout inflatedView;
-
 		for (int i = 0; i < amountToDisplayAtOnce; i++) {
-
 			inflatedView = (RelativeLayout) View.inflate(this,
 					R.layout.add_story, null);
 			inflatedView.setId(viewId);
@@ -179,19 +180,13 @@ public class MainActivity extends Activity {
 					.setText(Html.fromHtml(allAuthors[i]));
 			((TextView) inflatedView.findViewById(R.id.viewLocationText))
 					.setText(Html.fromHtml(allLocations[i]));
-			ImageLoader.getInstance().displayImage(
-					"assets://flags/" + allFlags[i] + ".png",
+			loader.displayImage("assets://flags/" + allFlags[i] + ".png",
 					((ImageView) inflatedView.findViewById(R.id.viewFlag)),
 					optionsFlag);
-			ImageLoader.getInstance().displayImage(
-					allProfiles[i],
-					((ImageView) inflatedView
-							.findViewById(R.id.viewProfilePicture)),
-					optionsProfile);
-			ImageLoader.getInstance().displayImage(
-					allBackgrounds[i],
-					((ImageView) inflatedView
-							.findViewById(R.id.viewBackgroundPicture)),
+			loader.displayImage(allProfiles[i], ((ImageView) inflatedView
+					.findViewById(R.id.viewProfilePicture)), optionsProfile);
+			loader.displayImage(allBackgrounds[i], ((ImageView) inflatedView
+					.findViewById(R.id.viewBackgroundPicture)),
 					optionsBackground);
 			((TextView) inflatedView.findViewById(R.id.viewStoryText))
 					.setText(Html.fromHtml(allStories[i]));
@@ -234,11 +229,9 @@ public class MainActivity extends Activity {
 		protected String[] doInBackground(String... params) {
 			try {
 				Document jsoupDocument = Jsoup.connect(API_URL).get();
-				backgroundElements = jsoupDocument
-						.select("[style^=background-image:url(']");
+				backgroundElements = jsoupDocument.select("[style^=background-image:url(']");
 				authorElements = jsoupDocument.select("[class=user_link]");
-				countryElements = jsoupDocument
-						.select("[class=browse_story_location with_countryflag_icon]");
+				countryElements = jsoupDocument.select("[class=browse_story_location with_countryflag_icon]");
 				flageElements = jsoupDocument.select("[style*=flags/mini]");
 				textElements = jsoupDocument.select("H3");
 				pictureElements = jsoupDocument.select("img");
@@ -253,33 +246,25 @@ public class MainActivity extends Activity {
 
 		@Override
 		protected String[] doInBackground(String... params) {
-			try {
-				int backgroundCounter = 0;
-				for (int i = 0; i < (amountToDisplayAtOnce * 2); i++) {
-					try {
-						String uRlString = backgroundElements.get(i).toString();
-						uRlString = uRlString.substring(73);
-						if (uRlString.startsWith("http")) {
-							uRlString = uRlString.substring(0,
-									uRlString.length() - 10);
-							allBackgrounds[backgroundCounter] = uRlString;
-							backgroundCounter++;
-						} else if (uRlString.startsWith("'")) {
-							backgroundCounter++;
-						}
-					} catch (Exception e) {
-						Log.e(TAG, "error fetching BACKGROUND from server", e);
+			int backgroundCounter = 0;
+			for (int i = 0; i < (amountToDisplayAtOnce * 2); i++) {
+				try {
+					String uRlString = backgroundElements.get(i).toString()
+							.substring(73);
+					if (uRlString.startsWith("http")) {
+						uRlString = uRlString.substring(0,
+								uRlString.length() - 10);
+						allBackgrounds[backgroundCounter] = uRlString;
+						backgroundCounter++;
+					} else if (uRlString.startsWith("'")) {
+						// Not the background image
+						backgroundCounter++;
 					}
+				} catch (Exception e) {
+					Log.e(TAG, "error fetching BACKGROUND from server", e);
 				}
-			} catch (Exception e) {
-				Log.e(TAG, "Background - error connecting to server", e);
 			}
 			return allBackgrounds;
-		}
-		
-		@Override
-		protected void onCancelled() {
-			super.onCancelled();
 		}
 
 		@Override
@@ -301,7 +286,6 @@ public class MainActivity extends Activity {
 		@Override
 		protected String[] doInBackground(ImageView... params) {
 			try {
-
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
 					String imageCode = flageElements.get(i).toString()
 							.substring(125, 127);
@@ -319,10 +303,8 @@ public class MainActivity extends Activity {
 		@Override
 		protected String[] doInBackground(ImageView... params) {
 			try {
-
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
-					String url = pictureElements.get(i).absUrl("src");
-					allProfiles[i] = url;
+					allProfiles[i] = pictureElements.get(i).absUrl("src");
 				}
 			} catch (Exception e) {
 				Log.e(TAG, "Profile - error connecting to server", e);
@@ -334,17 +316,13 @@ public class MainActivity extends Activity {
 	class StoryLoader extends AsyncTask<String, Void, String[]> {
 		protected String[] doInBackground(String... urls) {
 			try {
-				String[] textArray = new String[amountToDisplayAtOnce];
-
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
-					textArray[i] = textElements.get(i).text();
-					allStories[i] = textArray[i];
+					allStories[i] = textElements.get(i).text();
 				}
-				return textArray;
 			} catch (Exception e) {
 				Log.e(TAG, "error fetching TEXT from server", e);
-				return null;
 			}
+			return allStories;
 		}
 	}
 
@@ -357,11 +335,10 @@ public class MainActivity extends Activity {
 							+ "<br />";
 					allLocations[i] = countryElements.get(i).text();
 				}
-				return null;
 			} catch (Exception e) {
 				Log.e(TAG, "error fetching AUTHOR from server", e);
-				return null;
 			}
+			return allAuthors;
 		}
 	}
 }
