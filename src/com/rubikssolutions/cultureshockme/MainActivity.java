@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
 	public DisplayImageOptions optionsBackground;
 
 	private ProgressBar bar;
-	
+
 	private RelativeLayout wrapper;
 	private RelativeLayout inflatedView;
 
@@ -73,7 +73,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		wrapper = (RelativeLayout) findViewById(R.id.mainFeedView);
 
 		// Setup the spinning progressbar
@@ -174,7 +174,7 @@ public class MainActivity extends Activity {
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 					RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			lp.setMargins(0, 0, 0, 20);
+			// lp.setMargins(0, 0, 0, 20);
 			lp.addRule(RelativeLayout.BELOW, (viewId - 1));
 			((TextView) inflatedView.findViewById(R.id.viewAuthorText))
 					.setText(Html.fromHtml(allAuthors[i]));
@@ -229,9 +229,11 @@ public class MainActivity extends Activity {
 		protected String[] doInBackground(String... params) {
 			try {
 				Document jsoupDocument = Jsoup.connect(API_URL).get();
-				backgroundElements = jsoupDocument.select("[style^=background-image:url(']");
+				backgroundElements = jsoupDocument
+						.select("[style^=background-image:url(']");
 				authorElements = jsoupDocument.select("[class=user_link]");
-				countryElements = jsoupDocument.select("[class=browse_story_location with_countryflag_icon]");
+				countryElements = jsoupDocument
+						.select("[class=browse_story_location with_countryflag_icon]");
 				flageElements = jsoupDocument.select("[style*=flags/mini]");
 				textElements = jsoupDocument.select("H3");
 				pictureElements = jsoupDocument.select("img");
@@ -333,12 +335,27 @@ public class MainActivity extends Activity {
 					allAuthors[i] = "<big>" + "<i>"
 							+ authorElements.get(i).text() + "</i>" + "</big>"
 							+ "<br />";
-					allLocations[i] = countryElements.get(i).text();
+					allLocations[i] = shortenLocation(countryElements.get(i)
+							.text());
 				}
 			} catch (Exception e) {
 				Log.e(TAG, "error fetching AUTHOR from server", e);
 			}
 			return allAuthors;
+		}
+
+		private String shortenLocation(String location) {
+			//TODO - might break the Google Maps part
+			if (location.length() < 40) {
+				return location;
+			}
+			String[] splitByComma = location.split(",");
+			String shorterLocation = splitByComma[0] + " ... " + splitByComma[splitByComma.length - 1];
+			if (shorterLocation.length() >= 40) {
+				String[] splitBySpace = location.split(" ");
+				shorterLocation = splitBySpace[0] + " ... " + splitBySpace[splitBySpace.length - 1];
+			}
+			return shorterLocation;
 		}
 	}
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -9,6 +10,11 @@
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="3dp"
         android:contentDescription="@string/action_settings"
         android:maxHeight="24dp"
         android:maxWidth="24dp"
@@ -23,8 +29,10 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@id/viewFlag"
-        android:layout_marginEnd="3dp"
-        android:layout_marginRight="3dp"
+        android:layout_marginEnd="11dp"
+        android:layout_marginLeft="11dp"
+        android:layout_marginRight="11dp"
+        android:layout_marginStart="11dp"
         android:contentDescription="@string/action_settings"
         android:scaleType="fitCenter" />
 
@@ -35,7 +43,9 @@
         android:layout_alignBottom="@id/viewProfilePicture"
         android:layout_marginBottom="3dp"
         android:layout_marginEnd="1dp"
+        android:layout_marginLeft="9dp"
         android:layout_marginRight="1dp"
+        android:layout_marginStart="9dp"
         android:layout_toEndOf="@id/viewProfilePicture"
         android:layout_toRightOf="@id/viewProfilePicture"
         android:adjustViewBounds="true"
@@ -48,8 +58,10 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/viewProfilePicture"
         android:layout_marginBottom="14dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginRight="1dp"
+        android:layout_marginEnd="9dp"
+        android:layout_marginLeft="9dp"
+        android:layout_marginRight="9dp"
+        android:layout_marginStart="9dp"
         android:layout_toEndOf="@id/viewProfilePicture"
         android:layout_toRightOf="@id/viewProfilePicture"
         android:textIsSelectable="false"
@@ -62,14 +74,16 @@
         android:layout_alignBottom="@id/viewProfilePicture"
         android:layout_marginBottom="1dp"
         android:layout_marginEnd="1dp"
+        android:layout_marginLeft="1dp"
         android:layout_marginRight="1dp"
+        android:layout_marginStart="1dp"
         android:layout_toEndOf="@id/viewLocationPin"
         android:layout_toRightOf="@id/viewLocationPin"
+        android:clickable="true"
         android:gravity="bottom|start"
         android:onClick="goToLocation"
-        android:clickable="true"
         android:textSize="15sp" />
-    
+
     <ImageView
         android:id="@+id/viewBackgroundPicture"
         android:layout_width="match_parent"
@@ -77,6 +91,10 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@id/viewProfilePicture"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:adjustViewBounds="true"
         android:contentDescription="@string/action_settings"
@@ -89,9 +107,23 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@id/viewBackgroundPicture"
+        android:layout_marginEnd="9dp"
+        android:layout_marginLeft="9dp"
+        android:layout_marginRight="9dp"
+        android:layout_marginStart="9dp"
         android:layout_toEndOf="@id/viewProfilePicture"
         android:layout_toRightOf="@id/viewProfilePicture"
         android:textIsSelectable="false"
         android:textSize="17sp" />
+
+    <com.google.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="480dp"
+        android:layout_height="75dp"
+        android:layout_below="@id/viewStoryText"
+        ads:adSize="BANNER"
+        ads:adUnitId="a1526787211e243"
+        ads:loadAdOnCreate="true"
+        ads:testDevices="TEST_EMULATOR, 6456B7A2B82768C430C593969D0ED19A" />
 
 </RelativeLayout>
