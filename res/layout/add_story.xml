@@ -116,14 +116,4 @@
         android:textIsSelectable="false"
         android:textSize="17sp" />
 
-    <com.google.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="480dp"
-        android:layout_height="75dp"
-        android:layout_below="@id/viewStoryText"
-        ads:adSize="BANNER"
-        ads:adUnitId="a1526787211e243"
-        ads:loadAdOnCreate="true"
-        ads:testDevices="TEST_EMULATOR, 6456B7A2B82768C430C593969D0ED19A" />
-
 </RelativeLayout>
