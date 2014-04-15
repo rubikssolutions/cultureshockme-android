@@ -68,12 +68,12 @@ public class MainActivity extends Activity {
 
 	private RelativeLayout wrapper;
 	private RelativeLayout inflatedView;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		
 		wrapper = (RelativeLayout) findViewById(R.id.mainFeedView);
 
 		// Setup the spinning progressbar
