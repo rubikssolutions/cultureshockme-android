@@ -34,8 +34,8 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 public class MainActivity extends Activity {
 	private static String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more";
 	private static final String TAG = "MainActivity";
-
-	private int amountToDisplayAtOnce = 2;
+	private static final int MAX_LOCATION_LENGTH = 40;
+	private static final int DISPLAY_AT_ONCE = 2;
 
 	private static String[] allStories;
 	private static String[] allAuthors;
@@ -101,12 +101,12 @@ public class MainActivity extends Activity {
 		setupImageLoader();
 
 		// Create the arrays to hold ALL
-		allStories = new String[amountToDisplayAtOnce];
-		allAuthors = new String[amountToDisplayAtOnce];
-		allLocations = new String[amountToDisplayAtOnce];
-		allBackgrounds = new String[amountToDisplayAtOnce];
-		allProfiles = new String[amountToDisplayAtOnce];
-		allFlags = new String[amountToDisplayAtOnce];
+		allStories = new String[DISPLAY_AT_ONCE];
+		allAuthors = new String[DISPLAY_AT_ONCE];
+		allLocations = new String[DISPLAY_AT_ONCE];
+		allBackgrounds = new String[DISPLAY_AT_ONCE];
+		allProfiles = new String[DISPLAY_AT_ONCE];
+		allFlags = new String[DISPLAY_AT_ONCE];
 
 		// Configure the buttons
 		ImageButton infoButton = (ImageButton) findViewById(R.id.button_info);
@@ -128,7 +128,7 @@ public class MainActivity extends Activity {
 		});
 
 		getNewStoriesFromServer();
-		currentPage += amountToDisplayAtOnce;
+		currentPage += DISPLAY_AT_ONCE;
 	}
 
 	private void buttonClickedToLoadMore() {
@@ -164,7 +164,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void addPage() {
-		for (int i = 0; i < amountToDisplayAtOnce; i++) {
+		for (int i = 0; i < DISPLAY_AT_ONCE; i++) {
 			inflatedView = (RelativeLayout) View.inflate(this, R.layout.add_story, null);
 			inflatedView.setId(viewId);
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -184,7 +184,7 @@ public class MainActivity extends Activity {
 			wrapper.addView(inflatedView, lp);
 			viewId++;
 		}
-		currentPage += amountToDisplayAtOnce;
+		currentPage += DISPLAY_AT_ONCE;
 	}
 
 	private void getNewStoriesFromServer() {
@@ -238,7 +238,7 @@ public class MainActivity extends Activity {
 		@Override
 		protected String[] doInBackground(String... params) {
 			int backgroundCounter = 0;
-			for (int i = 0; i < (amountToDisplayAtOnce * 2); i++) {
+			for (int i = 0; i < (DISPLAY_AT_ONCE * 2); i++) {
 				try {
 					String uRlString = backgroundElements.get(i).toString().substring(73);
 					if (uRlString.startsWith("http")) {
@@ -259,7 +259,7 @@ public class MainActivity extends Activity {
 		@Override
 		protected void onPostExecute(String[] result) {
 			loading = false;
-			if (currentPage == amountToDisplayAtOnce) {
+			if (currentPage == DISPLAY_AT_ONCE) {
 				API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit=" + currentPage;
 				addPage();
 				getNewStoriesFromServer();
@@ -274,7 +274,7 @@ public class MainActivity extends Activity {
 		@Override
 		protected String[] doInBackground(ImageView... params) {
 			try {
-				for (int i = 0; i < amountToDisplayAtOnce; i++) {
+				for (int i = 0; i < DISPLAY_AT_ONCE; i++) {
 					String imageCode = flageElements.get(i).toString().substring(125, 127);
 					Log.d(TAG, "Flag code: " + imageCode);
 					allFlags[i] = imageCode;
@@ -290,7 +290,7 @@ public class MainActivity extends Activity {
 		@Override
 		protected String[] doInBackground(ImageView... params) {
 			try {
-				for (int i = 0; i < amountToDisplayAtOnce; i++) {
+				for (int i = 0; i < DISPLAY_AT_ONCE; i++) {
 					allProfiles[i] = pictureElements.get(i).absUrl("src");
 				}
 			} catch (Exception e) {
@@ -303,7 +303,7 @@ public class MainActivity extends Activity {
 	private class StoryLoader extends AsyncTask<String, Void, String[]> {
 		protected String[] doInBackground(String... urls) {
 			try {
-				for (int i = 0; i < amountToDisplayAtOnce; i++) {
+				for (int i = 0; i < DISPLAY_AT_ONCE; i++) {
 					allStories[i] = textElements.get(i).text();
 				}
 			} catch (Exception e) {
@@ -316,7 +316,7 @@ public class MainActivity extends Activity {
 	private class AuthorLoader extends AsyncTask<String, Void, String[]> {
 		protected String[] doInBackground(String... urls) {
 			try {
-				for (int i = 0; i < amountToDisplayAtOnce; i++) {
+				for (int i = 0; i < DISPLAY_AT_ONCE; i++) {
 					allAuthors[i] = "<big>" + "<i>" + authorElements.get(i).text() + "</i>" + "</big>" + "<br />";
 					allLocations[i] = shortenLocation(countryElements.get(i).text());
 				}
@@ -326,14 +326,19 @@ public class MainActivity extends Activity {
 			return allAuthors;
 		}
 
+		/**
+		 * Note - this might break the Google Maps search a bit!
+		 * 
+		 * @param location
+		 * @return a shorter version of the location, if deemed necessary
+		 */
 		private String shortenLocation(String location) {
-			// TODO - might break the Google Maps part
-			if (location.length() < 40) {
+			if (location.length() < MAX_LOCATION_LENGTH) {
 				return location;
 			}
 			String[] splitByComma = location.split(",");
 			String shorterLocation = splitByComma[0] + " ... " + splitByComma[splitByComma.length - 1];
-			if (shorterLocation.length() >= 40) {
+			if (shorterLocation.length() >= MAX_LOCATION_LENGTH) {
 				String[] splitBySpace = location.split(" ");
 				shorterLocation = splitBySpace[0] + " ... " + splitBySpace[splitBySpace.length - 1];
 			}
