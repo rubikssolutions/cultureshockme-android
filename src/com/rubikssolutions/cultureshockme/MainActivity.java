@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
 	private static String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more";
 	private static final String TAG = "MainActivity";
 
-	int amountToDisplayAtOnce = 2;
+	private int amountToDisplayAtOnce = 2;
 
 	private static String[] allStories;
 	private static String[] allAuthors;
@@ -51,29 +51,42 @@ public class MainActivity extends Activity {
 	private Elements authorElements;
 	private Elements countryElements;
 
-	int currentPage = 0;
+	private int currentPage = 0;
 
-	int viewId = 1;
+	private int viewId = 1;
 
-	boolean loading = true;
+	private boolean loading = true;
 	static Button loadMoreButton;
 
-	public ImageLoader loader;
-	public ImageLoaderConfiguration imageLoaderConfig;
-	public DisplayImageOptions optionsProfile;
-	public static DisplayImageOptions optionsFlag;
-	public DisplayImageOptions optionsBackground;
+	private ImageLoader loader;
+	private ImageLoaderConfiguration imageLoaderConfig;
+	private DisplayImageOptions optionsProfile;
+	private DisplayImageOptions optionsFlag;
+	private DisplayImageOptions optionsBackground;
 
 	private ProgressBar bar;
 
 	private RelativeLayout wrapper;
 	private RelativeLayout inflatedView;
-	
+	private OnClickListener mapsListener;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
+		// Setup listener
+		mapsListener = new OnClickListener() {
+
+			@Override
+			public void onClick(View view) {
+				String location = ((TextView) view).getText().toString();
+				Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse("http://maps.google.com/?q="
+						+ location));
+				startActivity(intent);
+			}
+		};
+
 		wrapper = (RelativeLayout) findViewById(R.id.mainFeedView);
 
 		// Setup the spinning progressbar
@@ -82,10 +95,8 @@ public class MainActivity extends Activity {
 		// Calculate position to center it
 		DisplayMetrics dm = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(dm);
-		bar.setPadding(0, (int) (dm.heightPixels / 2f)
-				- (int) (dm.heightPixels / 8f), 0, 0);
-		Log.d("windowsize", "windowsize : "
-				+ ((dm.heightPixels / 2f) - (dm.heightPixels / 8f)));
+		bar.setPadding(0, (int) (dm.heightPixels / 2f) - (int) (dm.heightPixels / 8f), 0, 0);
+		Log.d("windowsize", "windowsize : " + ((dm.heightPixels / 2f) - (dm.heightPixels / 8f)));
 
 		setupImageLoader();
 
@@ -102,8 +113,7 @@ public class MainActivity extends Activity {
 		infoButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent infoScreenIntent = new Intent(MainActivity.this,
-						InfoActivity.class);
+				Intent infoScreenIntent = new Intent(MainActivity.this, InfoActivity.class);
 				MainActivity.this.startActivity(infoScreenIntent);
 			}
 		});
@@ -124,8 +134,7 @@ public class MainActivity extends Activity {
 	private void buttonClickedToLoadMore() {
 		if (loading == false) {
 			loading = true;
-			API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit="
-					+ currentPage;
+			API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit=" + currentPage;
 			Log.i(TAG, currentPage + "== current page");
 			Log.i(TAG, API_URL);
 			getNewStoriesFromServer();
@@ -133,34 +142,22 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	public void goToLocation(View view) {
-		String location = ((TextView) view).getText().toString();
-		Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-				Uri.parse("http://maps.google.com/?q=" + location));
-		startActivity(intent);
-	}
-
 	private void setupImageLoader() {
 		// Universal image loader
-		optionsProfile = new DisplayImageOptions.Builder()
-				.showStubImage(R.drawable.profile_default)
-				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
-				.showImageOnFail(R.drawable.profile_default).cacheOnDisc(true)
-				.bitmapConfig(Bitmap.Config.RGB_565).build();
-
-		optionsFlag = new DisplayImageOptions.Builder()
-				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
-				.bitmapConfig(Bitmap.Config.RGB_565).build();
-
-		optionsBackground = new DisplayImageOptions.Builder()
-				.showStubImage(R.drawable.image_loading)
-				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
+		optionsProfile = new DisplayImageOptions.Builder().showStubImage(R.drawable.profile_default)
+				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED).showImageOnFail(R.drawable.profile_default)
 				.cacheOnDisc(true).bitmapConfig(Bitmap.Config.RGB_565).build();
 
-		imageLoaderConfig = new ImageLoaderConfiguration.Builder(
-				getApplicationContext())
-				.defaultDisplayImageOptions(DisplayImageOptions.createSimple())
-				.denyCacheImageMultipleSizesInMemory().build();
+		optionsFlag = new DisplayImageOptions.Builder().imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
+				.bitmapConfig(Bitmap.Config.RGB_565).build();
+
+		optionsBackground = new DisplayImageOptions.Builder().showStubImage(R.drawable.image_loading)
+				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED).cacheOnDisc(true).bitmapConfig(Bitmap.Config.RGB_565)
+				.build();
+
+		imageLoaderConfig = new ImageLoaderConfiguration.Builder(getApplicationContext())
+				.defaultDisplayImageOptions(DisplayImageOptions.createSimple()).denyCacheImageMultipleSizesInMemory()
+				.build();
 
 		loader = ImageLoader.getInstance();
 		loader.init(imageLoaderConfig);
@@ -168,35 +165,29 @@ public class MainActivity extends Activity {
 
 	private void addPage() {
 		for (int i = 0; i < amountToDisplayAtOnce; i++) {
-			inflatedView = (RelativeLayout) View.inflate(this,
-					R.layout.add_story, null);
+			inflatedView = (RelativeLayout) View.inflate(this, R.layout.add_story, null);
 			inflatedView.setId(viewId);
-			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
+			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
 			// lp.setMargins(0, 0, 0, 20);
 			lp.addRule(RelativeLayout.BELOW, (viewId - 1));
-			((TextView) inflatedView.findViewById(R.id.viewAuthorText))
-					.setText(Html.fromHtml(allAuthors[i]));
-			((TextView) inflatedView.findViewById(R.id.viewLocationText))
-					.setText(Html.fromHtml(allLocations[i]));
+			((TextView) inflatedView.findViewById(R.id.viewAuthorText)).setText(Html.fromHtml(allAuthors[i]));
+			((TextView) inflatedView.findViewById(R.id.viewLocationText)).setText(Html.fromHtml(allLocations[i]));
+			((TextView) inflatedView.findViewById(R.id.viewLocationText)).setOnClickListener(mapsListener);
 			loader.displayImage("assets://flags/" + allFlags[i] + ".png",
-					((ImageView) inflatedView.findViewById(R.id.viewFlag)),
-					optionsFlag);
-			loader.displayImage(allProfiles[i], ((ImageView) inflatedView
-					.findViewById(R.id.viewProfilePicture)), optionsProfile);
-			loader.displayImage(allBackgrounds[i], ((ImageView) inflatedView
-					.findViewById(R.id.viewBackgroundPicture)),
+					((ImageView) inflatedView.findViewById(R.id.viewFlag)), optionsFlag);
+			loader.displayImage(allProfiles[i], ((ImageView) inflatedView.findViewById(R.id.viewProfilePicture)),
+					optionsProfile);
+			loader.displayImage(allBackgrounds[i], ((ImageView) inflatedView.findViewById(R.id.viewBackgroundPicture)),
 					optionsBackground);
-			((TextView) inflatedView.findViewById(R.id.viewStoryText))
-					.setText(Html.fromHtml(allStories[i]));
+			((TextView) inflatedView.findViewById(R.id.viewStoryText)).setText(Html.fromHtml(allStories[i]));
 			wrapper.addView(inflatedView, lp);
 			viewId++;
 		}
 		currentPage += amountToDisplayAtOnce;
 	}
 
-	public void getNewStoriesFromServer() {
+	private void getNewStoriesFromServer() {
 		final Handler handler = new Handler();
 		Timer timer = new Timer();
 		TimerTask doAsynchronousTask = new TimerTask() {
@@ -223,17 +214,15 @@ public class MainActivity extends Activity {
 		timer.schedule(doAsynchronousTask, 0);
 	}
 
-	class JsoupLoader extends AsyncTask<String, Void, String[]> {
+	private class JsoupLoader extends AsyncTask<String, Void, String[]> {
 
 		@Override
 		protected String[] doInBackground(String... params) {
 			try {
 				Document jsoupDocument = Jsoup.connect(API_URL).get();
-				backgroundElements = jsoupDocument
-						.select("[style^=background-image:url(']");
+				backgroundElements = jsoupDocument.select("[style^=background-image:url(']");
 				authorElements = jsoupDocument.select("[class=user_link]");
-				countryElements = jsoupDocument
-						.select("[class=browse_story_location with_countryflag_icon]");
+				countryElements = jsoupDocument.select("[class=browse_story_location with_countryflag_icon]");
 				flageElements = jsoupDocument.select("[style*=flags/mini]");
 				textElements = jsoupDocument.select("H3");
 				pictureElements = jsoupDocument.select("img");
@@ -244,18 +233,16 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	class BackgroundLoader extends AsyncTask<String, Void, String[]> {
+	private class BackgroundLoader extends AsyncTask<String, Void, String[]> {
 
 		@Override
 		protected String[] doInBackground(String... params) {
 			int backgroundCounter = 0;
 			for (int i = 0; i < (amountToDisplayAtOnce * 2); i++) {
 				try {
-					String uRlString = backgroundElements.get(i).toString()
-							.substring(73);
+					String uRlString = backgroundElements.get(i).toString().substring(73);
 					if (uRlString.startsWith("http")) {
-						uRlString = uRlString.substring(0,
-								uRlString.length() - 10);
+						uRlString = uRlString.substring(0, uRlString.length() - 10);
 						allBackgrounds[backgroundCounter] = uRlString;
 						backgroundCounter++;
 					} else if (uRlString.startsWith("'")) {
@@ -273,8 +260,7 @@ public class MainActivity extends Activity {
 		protected void onPostExecute(String[] result) {
 			loading = false;
 			if (currentPage == amountToDisplayAtOnce) {
-				API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit="
-						+ currentPage;
+				API_URL = "http://culture-shock.me/ajax/?act=get_stories_more&limit=" + currentPage;
 				addPage();
 				getNewStoriesFromServer();
 			}
@@ -284,13 +270,12 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	class FlagLoader extends AsyncTask<ImageView, Void, String[]> {
+	private class FlagLoader extends AsyncTask<ImageView, Void, String[]> {
 		@Override
 		protected String[] doInBackground(ImageView... params) {
 			try {
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
-					String imageCode = flageElements.get(i).toString()
-							.substring(125, 127);
+					String imageCode = flageElements.get(i).toString().substring(125, 127);
 					Log.d(TAG, "Flag code: " + imageCode);
 					allFlags[i] = imageCode;
 				}
@@ -301,7 +286,7 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	class ProfilePictureLoader extends AsyncTask<ImageView, Void, String[]> {
+	private class ProfilePictureLoader extends AsyncTask<ImageView, Void, String[]> {
 		@Override
 		protected String[] doInBackground(ImageView... params) {
 			try {
@@ -315,7 +300,7 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	class StoryLoader extends AsyncTask<String, Void, String[]> {
+	private class StoryLoader extends AsyncTask<String, Void, String[]> {
 		protected String[] doInBackground(String... urls) {
 			try {
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
@@ -328,15 +313,12 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	class AuthorLoader extends AsyncTask<String, Void, String[]> {
+	private class AuthorLoader extends AsyncTask<String, Void, String[]> {
 		protected String[] doInBackground(String... urls) {
 			try {
 				for (int i = 0; i < amountToDisplayAtOnce; i++) {
-					allAuthors[i] = "<big>" + "<i>"
-							+ authorElements.get(i).text() + "</i>" + "</big>"
-							+ "<br />";
-					allLocations[i] = shortenLocation(countryElements.get(i)
-							.text());
+					allAuthors[i] = "<big>" + "<i>" + authorElements.get(i).text() + "</i>" + "</big>" + "<br />";
+					allLocations[i] = shortenLocation(countryElements.get(i).text());
 				}
 			} catch (Exception e) {
 				Log.e(TAG, "error fetching AUTHOR from server", e);
@@ -345,7 +327,7 @@ public class MainActivity extends Activity {
 		}
 
 		private String shortenLocation(String location) {
-			//TODO - might break the Google Maps part
+			// TODO - might break the Google Maps part
 			if (location.length() < 40) {
 				return location;
 			}

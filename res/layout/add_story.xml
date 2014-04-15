@@ -80,8 +80,8 @@
         android:layout_toEndOf="@id/viewLocationPin"
         android:layout_toRightOf="@id/viewLocationPin"
         android:clickable="true"
+        android:textIsSelectable="false"
         android:gravity="bottom|start"
-        android:onClick="goToLocation"
         android:textSize="15sp" />
 
     <ImageView
