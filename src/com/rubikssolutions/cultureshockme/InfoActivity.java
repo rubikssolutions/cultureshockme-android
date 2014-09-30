@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 
-class InfoActivity extends Activity {
+public class InfoActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

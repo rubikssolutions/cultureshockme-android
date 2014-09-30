@@ -1,5 +1,6 @@
 package com.rubikssolutions.cultureshockme;
 
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,7 +35,6 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 public class MainActivity extends Activity {
 	private static String API_URL = "http://culture-shock.me/ajax/?act=get_stories_more";
 	private static final String TAG = "MainActivity";
-	private static final int MAX_LOCATION_LENGTH = 40;
 	private static final int DISPLAY_AT_ONCE = 2;
 
 	private static String[] allStories;
@@ -174,7 +174,7 @@ public class MainActivity extends Activity {
 			((TextView) inflatedView.findViewById(R.id.viewAuthorText)).setText(Html.fromHtml(allAuthors[i]));
 			((TextView) inflatedView.findViewById(R.id.viewLocationText)).setText(Html.fromHtml(allLocations[i]));
 			((TextView) inflatedView.findViewById(R.id.viewLocationText)).setOnClickListener(mapsListener);
-			loader.displayImage("assets://flags/" + allFlags[i] + ".png",
+			loader.displayImage("assets://flags/" + allFlags[i].toUpperCase(Locale.getDefault()) + ".png",
 					((ImageView) inflatedView.findViewById(R.id.viewFlag)), optionsFlag);
 			loader.displayImage(allProfiles[i], ((ImageView) inflatedView.findViewById(R.id.viewProfilePicture)),
 					optionsProfile);
@@ -318,31 +318,13 @@ public class MainActivity extends Activity {
 			try {
 				for (int i = 0; i < DISPLAY_AT_ONCE; i++) {
 					allAuthors[i] = "<big>" + "<i>" + authorElements.get(i).text() + "</i>" + "</big>" + "<br />";
-					allLocations[i] = shortenLocation(countryElements.get(i).text());
+					allLocations[i] = countryElements.get(i).text();
+					Log.d("LOCATION", countryElements.get(i).text());
 				}
 			} catch (Exception e) {
 				Log.e(TAG, "error fetching AUTHOR from server", e);
 			}
 			return allAuthors;
-		}
-
-		/**
-		 * Note - this might break the Google Maps search a bit!
-		 * 
-		 * @param location
-		 * @return a shorter version of the location, if deemed necessary
-		 */
-		private String shortenLocation(String location) {
-			if (location.length() < MAX_LOCATION_LENGTH) {
-				return location;
-			}
-			String[] splitByComma = location.split(",");
-			String shorterLocation = splitByComma[0] + " ... " + splitByComma[splitByComma.length - 1];
-			if (shorterLocation.length() >= MAX_LOCATION_LENGTH) {
-				String[] splitBySpace = location.split(" ");
-				shorterLocation = splitBySpace[0] + " ... " + splitBySpace[splitBySpace.length - 1];
-			}
-			return shorterLocation;
 		}
 	}
 }
