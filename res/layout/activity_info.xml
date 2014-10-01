@@ -82,21 +82,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/info_questions_aiesec"
-                android:textSize="15sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:autoLink="email"
-                android:gravity="center"
-                android:text="@string/info_email_aiesec"
-                android:textSize="17sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
                 android:paddingTop="15dp"
                 android:text="@string/info_github_description"
                 android:textSize="15sp" />
@@ -112,14 +97,14 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/info_company_name"
                 android:adjustViewBounds="true"
-                android:paddingTop="35dp"
+                android:contentDescription="@string/info_company_name"
                 android:paddingBottom="10dp"
+                android:paddingEnd="13dp"
                 android:paddingLeft="45dp"
                 android:paddingRight="45dp"
                 android:paddingStart="13dp"
-                android:paddingEnd="13dp"
+                android:paddingTop="35dp"
                 android:src="@drawable/logo_rubiks_wide" />
         </LinearLayout>
     </ScrollView>

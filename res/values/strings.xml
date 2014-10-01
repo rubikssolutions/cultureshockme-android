@@ -13,9 +13,6 @@
     <string name="info_questions_app">Questions, suggestions, ideas and help concerning this app:</string>
     <string name="info_email_app">cs@rubikssolutions.com</string>
     
-    <string name="info_questions_aiesec">\nQuestions and comments about the Culture Shock Web page:</string>
-    <string name="info_email_aiesec">rachelw@ai.aiesec.org</string>
-    
     <string name="info_github_description">The open source code of this app:</string>
     <string name="info_github">https://github.com/rubikssolutions/cultureshockme-android</string>
 
