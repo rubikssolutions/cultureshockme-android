@@ -169,13 +169,12 @@ public class MainActivity extends Activity {
 			inflatedView.setId(viewId);
 			RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			// lp.setMargins(0, 0, 0, 20);
 			lp.addRule(RelativeLayout.BELOW, (viewId - 1));
 			((TextView) inflatedView.findViewById(R.id.viewAuthorText)).setText(Html.fromHtml(allAuthors[i]));
 			((TextView) inflatedView.findViewById(R.id.viewLocationText)).setText(Html.fromHtml(allLocations[i]));
 			((TextView) inflatedView.findViewById(R.id.viewLocationText)).setOnClickListener(mapsListener);
 			loader.displayImage("assets://flags/" + allFlags[i].toUpperCase(Locale.getDefault()) + ".png",
-					((ImageView) inflatedView.findViewById(R.id.viewFlag)), optionsFlag);
+					((ImageView) inflatedView.findViewById(R.id.viewLocationPin)), optionsFlag);
 			loader.displayImage(allProfiles[i], ((ImageView) inflatedView.findViewById(R.id.viewProfilePicture)),
 					optionsProfile);
 			loader.displayImage(allBackgrounds[i], ((ImageView) inflatedView.findViewById(R.id.viewBackgroundPicture)),

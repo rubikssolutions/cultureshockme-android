@@ -26,7 +26,7 @@ public class MyScrollView extends ScrollView {
 	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
 	        View view = (View) getChildAt(getChildCount()-1);
 	        int diff = (view.getBottom() - (getHeight() + getScrollY()));// Calculate the scrolldiff
-	        if( diff <= 10){  // if diff is zero, then the bottom has been reached
+	        if( diff <= 20){  // if diff is zero, then the bottom has been reached
 	            Log.d(TAG, "Scrollview bottom has been reached" );
 	            MainActivity.loadMoreButton.performClick();
 	        }
